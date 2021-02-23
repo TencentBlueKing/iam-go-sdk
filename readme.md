@@ -1,3 +1,8 @@
+
+[![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://github.com/TencentBlueKing/iam-go-sdk/blob/master/LICENSE.txt) [![Release Version](https://img.shields.io/badge/release-0.0.4-brightgreen.svg)](https://github.com/TencentBlueKing/iam-go-sdk/releases) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/TencentBlueKing/iam-go-sdk/pulls)
+
+[(English Documents Available)](readme_en.md)
+
 ## Overview
 
 iam-go-sdk 是蓝鲸权限中心(BK-IAM)提供的用于快速接入权限体系的go SDK
