@@ -1,3 +1,5 @@
+[![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://github.com/TencentBlueKing/iam-go-sdk/blob/master/LICENSE.txt) [![Release Version](https://img.shields.io/badge/release-0.0.4-brightgreen.svg)](https://github.com/TencentBlueKing/iam-go-sdk/releases) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/TencentBlueKing/iam-go-sdk/pulls)
+
 ## Overview
 
 iam-go-sdk is the SDK of blueking IAM(BK-IAM), your system can use BK-IAM easily via SDK.
@@ -66,8 +68,6 @@ BenchmarkExprCellIn-12            	 2872075	       411 ns/op	      64 B/op	     
 ## Contributing
 
 If you have good ideas or suggestions, please let us know by Issues or Pull Requests and contribute to the Blue Whale Open Source Community.
-
-If you are interested in contributing, check out the [CONTRIBUTING.md], also join our [Tencent OpenSource Plan](https://opensource.tencent.com/contribution).
 
 ## License
 
