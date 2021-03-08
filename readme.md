@@ -32,7 +32,7 @@ $ go get -u github.com/TencentBlueKing/iam-go-sdk
 
 ### Usage
 
-- [使用文档](usage.md)
+- [使用文档](docs/usage.md)
 - [examples](examples/)
 
 ## Benchmark
