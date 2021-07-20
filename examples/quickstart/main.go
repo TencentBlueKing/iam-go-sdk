@@ -8,7 +8,6 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 // +build !codeanalysis
 
 package main
@@ -45,6 +44,8 @@ func main() {
 	)
 
 	i := iam.NewIAM("bk_paas", "bk_paas", "{app_secret}", "http://{iam_backend_addr}", "http://{paas_domain}")
+	// if your TencentBlueking has a APIGateway, use NewAPIGatewayIAM, the url suffix is /stage/(for testing) and /prod/(for production)
+	// i := iam.NewAPIGatewayIAM("bk_paas", "bk_paas", "{app_secret}", "http://bk-iam.{APIGATEWAY_DOMAIN}/stage/")
 
 	allowed, err := i.IsAllowed(req)
 	fmt.Println("isAllowed:", allowed, err)
@@ -98,4 +99,5 @@ func main() {
 
 	token, err := i.GetToken()
 	fmt.Println("GetToken:", token, err)
+
 }
