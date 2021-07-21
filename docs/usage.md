@@ -7,6 +7,15 @@
 	i := iam.NewIAM("bk_paas", "bk_paas", "{app_secret}", "http://{iam_backend_addr}", "http://{paas_domain}")
 ```
 
+如果是使用 APIGateway 的方式
+
+  
+```go
+    import "github.com/TencentBlueKing/iam-go-sdk"
+	// if your TencentBlueking has a APIGateway, use NewAPIGatewayIAM, the url suffix is /stage/(for testing) and /prod/(for production)
+	i := iam.NewAPIGatewayIAM("bk_paas", "bk_paas", "{app_secret}", "http://bk-iam.{APIGATEWAY_DOMAIN}/stage/")
+```
+
 
 ### IsAllowed
 
