@@ -23,6 +23,8 @@ import (
 // ESBClient is the interface of esb
 type ESBClient interface {
 	GetApplyURL(bkToken string, bkUsername string, body interface{}) (string, error)
+	// NOTE: will remove soon, change all API to APIGateway
+	//       so you should not add more interface here!!!!!!
 }
 
 type esbClient struct {
