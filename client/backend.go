@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/parnurzeal/gorequest"
@@ -75,10 +76,13 @@ type IAMBackendClient interface {
 	PolicyGet(policyID int64) (data map[string]interface{}, err error)
 	PolicyList(body interface{}) (data map[string]interface{}, err error)
 	PolicySubjects(policyIDs []int64) (data []map[string]interface{}, err error)
+
+	GetApplyURL(body interface{}) (string, error)
 }
 
 type iamBackendClient struct {
-	Host string
+	Host         string
+	IsAPIGateway bool
 
 	System    string
 	appCode   string
@@ -89,9 +93,11 @@ type iamBackendClient struct {
 }
 
 // NewIAMBackendClient will create a iam backend client
-func NewIAMBackendClient(host string, system string, appCode string, appSecret string) IAMBackendClient {
+func NewIAMBackendClient(host string, isAPIGateway bool, system string, appCode string, appSecret string) IAMBackendClient {
+	host = strings.TrimRight(host, "/")
 	return &iamBackendClient{
-		Host: host,
+		Host:         host,
+		IsAPIGateway: isAPIGateway,
 
 		System:    system,
 		appCode:   appCode,
@@ -116,9 +122,22 @@ func (c *iamBackendClient) call(
 	}
 
 	headers := map[string]string{
-		"X-BK-APP-CODE":    c.appCode,
-		"X-BK-APP-SECRET":  c.appSecret,
 		"X-Bk-IAM-Version": bkIAMVersion,
+	}
+
+	if c.IsAPIGateway {
+		auth, err := json.Marshal(map[string]string{
+			"bk_app_code":   c.appCode,
+			"bk_app_secret": c.appSecret,
+		})
+		if err != nil {
+			return fmt.Errorf("generate apigateway call header fail. err=`%s`", err)
+		}
+
+		headers["X-Bkapi-Authorization"] = util.BytesToString(auth)
+	} else {
+		headers["X-BK-APP-CODE"] = c.appCode
+		headers["X-BK-APP-SECRET"] = c.appSecret
 	}
 
 	url := fmt.Sprintf("%s%s", c.Host, path)
@@ -295,3 +314,23 @@ func (c *iamBackendClient) PolicySubjects(policyIDs []int64) (data []map[string]
 	data, err = c.callWithReturnSliceMapData(GET, path, body, 10)
 	return
 }
+
+// GetApplyURL will get apply url from iam saas
+func (c *iamBackendClient) GetApplyURL(body interface{}) (url string, err error) {
+	path := "/api/v1/open/application/"
+	data, err := c.callWithReturnMapData(POST, path, body, 10)
+	if err != nil {
+		return "", err
+	}
+
+	urlI, ok := data["url"]
+	if !ok {
+		return "", errors.New("no token in response body")
+	}
+	url, ok = urlI.(string)
+	if !ok {
+		return "", errors.New("token is not a valid string")
+	}
+	return url, nil
+}
+
