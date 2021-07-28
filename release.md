@@ -1,6 +1,10 @@
 版本日志
 ===============
 
+## IAM v0.0.5
+
+- [NEW] support call apis via APIGateway
+
 ## IAM v0.0.4
 
 - [NEW] add more IAM backend apis
