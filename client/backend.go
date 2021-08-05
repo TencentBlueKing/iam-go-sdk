@@ -325,12 +325,11 @@ func (c *iamBackendClient) GetApplyURL(body interface{}) (url string, err error)
 
 	urlI, ok := data["url"]
 	if !ok {
-		return "", errors.New("no token in response body")
+		return "", errors.New("no url in response body")
 	}
 	url, ok = urlI.(string)
 	if !ok {
-		return "", errors.New("token is not a valid string")
+		return "", errors.New("url is not a valid string")
 	}
 	return url, nil
 }
-
