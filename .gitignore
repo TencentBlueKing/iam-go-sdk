@@ -22,3 +22,4 @@
 .envrc
 *.cov
 .idea
+.DS_Store
