@@ -38,6 +38,7 @@
 package eval
 
 import (
+	"encoding/json"
 	"reflect"
 
 	. "github.com/onsi/ginkgo"
@@ -94,36 +95,36 @@ var _ = Describe("Compare", func() {
 			resLess, isComparable := compare(currCase.less, currCase.greater, reflect.ValueOf(currCase.less).Kind())
 
 			assert.True(GinkgoT(), isComparable)
-			//if !isComparable {
+			// if !isComparable {
 			//	t.Error("object should be comparable for type " + currCase.cType)
-			//}
+			// }
 
 			assert.Equal(GinkgoT(), resLess, compareLess)
-			//if resLess != compareLess {
+			// if resLess != compareLess {
 			//	t.Errorf("object less should be less than greater for type " + currCase.cType)
-			//}
+			// }
 
 			resGreater, isComparable := compare(currCase.greater, currCase.less, reflect.ValueOf(currCase.less).Kind())
 			assert.True(GinkgoT(), isComparable)
-			//if !isComparable {
+			// if !isComparable {
 			//	t.Error("object are comparable for type " + currCase.cType)
-			//}
+			// }
 
 			assert.Equal(GinkgoT(), resGreater, compareGreater)
-			//if resGreater != compareGreater {
+			// if resGreater != compareGreater {
 			//	t.Errorf("object greater should be greater than less for type " + currCase.cType)
-			//}
+			// }
 
 			resEqual, isComparable := compare(currCase.less, currCase.less, reflect.ValueOf(currCase.less).Kind())
 			assert.True(GinkgoT(), isComparable)
-			//if !isComparable {
+			// if !isComparable {
 			//	t.Error("object are comparable for type " + currCase.cType)
-			//}
+			// }
 
 			assert.Equal(GinkgoT(), resEqual, compareEqual)
-			//if resEqual != 0 {
+			// if resEqual != 0 {
 			//	t.Errorf("objects should be equal for type " + currCase.cType)
-			//}
+			// }
 		}
 
 	})
@@ -295,6 +296,81 @@ var _ = Describe("Compare", func() {
 				assert.True(GinkgoT(), compareResult)
 			}
 
+		})
+
+		It("compareTwoValues, no same type, int, ok", func() {
+			for _, currCase := range []struct {
+				v1           interface{}
+				v2           interface{}
+				compareTypes []CompareType
+			}{
+				{v1: 1, v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: int(2), compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: int64(2), compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: int32(2), compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: int16(2), compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: int8(2), compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: uint(2), compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: uint64(2), compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: uint32(2), compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: uint16(2), compareTypes: []CompareType{compareLess}},
+				{v1: 1, v2: uint8(2), compareTypes: []CompareType{compareLess}},
+				{v1: int(1), v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: int64(1), v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: int32(1), v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: int16(1), v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: int8(1), v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: uint(1), v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: uint64(1), v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: uint32(1), v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: uint16(1), v2: 2, compareTypes: []CompareType{compareLess}},
+				{v1: uint8(1), v2: 2, compareTypes: []CompareType{compareLess}},
+			} {
+				compareResult := compareTwoValues(currCase.v1, currCase.v2, currCase.compareTypes)
+				assert.True(GinkgoT(), compareResult)
+			}
+
+		})
+
+		It("compareTwoValues, no same type, float, ok", func() {
+			for _, currCase := range []struct {
+				v1           interface{}
+				v2           interface{}
+				compareTypes []CompareType
+			}{
+				{v1: int(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+				{v1: int64(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+				{v1: int32(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+				{v1: int16(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+				{v1: int8(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+				{v1: uint(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+				{v1: uint64(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+				{v1: uint32(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+				{v1: uint16(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+				{v1: uint8(1), v2: 2.1, compareTypes: []CompareType{compareLess}},
+
+				{v1: int(1), v2: float32(2.1), compareTypes: []CompareType{compareLess}},
+				{v1: int(1), v2: float64(2.1), compareTypes: []CompareType{compareLess}},
+				{v1: float32(1.1), v2: float64(2.1), compareTypes: []CompareType{compareLess}},
+			} {
+				compareResult := compareTwoValues(currCase.v1, currCase.v2, currCase.compareTypes)
+				assert.True(GinkgoT(), compareResult)
+			}
+		})
+
+		It("compareTwoValues, json.Number, ok", func() {
+			for _, currCase := range []struct {
+				v1           interface{}
+				v2           interface{}
+				compareTypes []CompareType
+			}{
+				{v1: int(1), v2: json.Number("2"), compareTypes: []CompareType{compareLess}},
+				{v1: int(1), v2: json.Number("2.1"), compareTypes: []CompareType{compareLess}},
+				{v1: json.Number("1"), v2: json.Number("2.1"), compareTypes: []CompareType{compareLess}},
+			} {
+				compareResult := compareTwoValues(currCase.v1, currCase.v2, currCase.compareTypes)
+				assert.True(GinkgoT(), compareResult)
+			}
 		})
 
 	})
