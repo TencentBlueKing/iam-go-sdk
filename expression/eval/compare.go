@@ -345,6 +345,17 @@ func compare(obj1, obj2 interface{}, kind reflect.Kind) (CompareType, bool) {
 	return compareEqual, false
 }
 
+// ValueEquals asserts that the first element is value-equal to the second
+// only care about the value, will cast the type to the same type before do compare
+//
+//    assert.ValueEquals(t, 2, 1)
+//    assert.ValueEquals(t, 2, float64(2.0))
+//    assert.ValueEquals(t, "b", "a")
+// it's different to the `Equals` which use reflect.DeepEqual will check the type and value are the same
+func ValueEquals(e1 interface{}, e2 interface{}) bool {
+	return compareTwoValues(e1, e2, []CompareType{compareEqual})
+}
+
 // Greater asserts that the first element is greater than the second
 //
 //    assert.Greater(t, 2, 1)

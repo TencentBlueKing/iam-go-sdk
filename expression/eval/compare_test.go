@@ -158,6 +158,17 @@ var _ = Describe("Compare", func() {
 
 	})
 
+	It("ValueEquals", func() {
+		assert.True(GinkgoT(), ValueEquals("a", "a"))
+		assert.True(GinkgoT(), ValueEquals(1, 1))
+		assert.True(GinkgoT(), ValueEquals(float64(1), float64(1)))
+		assert.True(GinkgoT(), ValueEquals(float64(1), 1))
+		assert.True(GinkgoT(), ValueEquals(float64(1), json.Number("1")))
+
+		assert.False(GinkgoT(), ValueEquals(1, 2))
+		assert.False(GinkgoT(), ValueEquals("a", "b"))
+	})
+
 	It("GreaterOrEqual", func() {
 		assert.True(GinkgoT(), GreaterOrEqual(2, 1))
 		assert.True(GinkgoT(), GreaterOrEqual(1, 1))
