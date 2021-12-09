@@ -12,6 +12,7 @@
 package expression_test
 
 import (
+	"encoding/json"
 	"strconv"
 	"testing"
 
@@ -52,7 +53,7 @@ var _ = Describe("Expr", func() {
 			// String
 			assert.Equal(GinkgoT(), "((obj.id eq 1) AND (obj.name eq object))", e.String())
 
-			//hit
+			// hit
 			o.Set("obj", map[string]interface{}{
 				"id":   1,
 				"name": "object",
@@ -62,7 +63,7 @@ var _ = Describe("Expr", func() {
 			// Render
 			assert.Equal(GinkgoT(), "((1 eq 1) AND (object eq object))", e.Render(o))
 
-			//miss
+			// miss
 			o.Set("obj", map[string]interface{}{
 				"id":   2,
 				"name": "object",
@@ -91,7 +92,7 @@ var _ = Describe("Expr", func() {
 			// String
 			assert.Equal(GinkgoT(), "((obj.id eq 1) OR (obj.name eq object))", e.String())
 
-			//hit
+			// hit
 			o.Set("obj", map[string]interface{}{
 				"id":   1,
 				"name": "object1",
@@ -101,7 +102,7 @@ var _ = Describe("Expr", func() {
 			// Render
 			assert.Equal(GinkgoT(), "((1 eq 1) OR (object1 eq object))", e.Render(o))
 
-			//miss
+			// miss
 			o.Set("obj", map[string]interface{}{
 				"id":   2,
 				"name": "object2",
@@ -506,6 +507,46 @@ func BenchmarkExprCellLess(b *testing.B) {
 		e.Eval(o)
 	}
 }
+func BenchmarkExprCellLessDifferentType(b *testing.B) {
+	e := &expression.ExprCell{
+		OP:    operator.Lt,
+		Field: "obj.age",
+		Value: float32(18),
+	}
+
+	o := expression.NewObjectSet()
+	o.Set("obj", map[string]interface{}{
+		"name": "helloworld",
+		"age":  int64(2),
+	})
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		e.Eval(o)
+	}
+}
+
+func BenchmarkExprCellLessDifferentTypeJsonNumber(b *testing.B) {
+	e := &expression.ExprCell{
+		OP:    operator.Lt,
+		Field: "obj.age",
+		Value: json.Number("18"),
+	}
+
+	o := expression.NewObjectSet()
+	o.Set("obj", map[string]interface{}{
+		"name": "helloworld",
+		"age":  2,
+	})
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		e.Eval(o)
+	}
+}
+
 func BenchmarkExprCellStartsWith(b *testing.B) {
 	e := &expression.ExprCell{
 		OP:    operator.StartsWith,

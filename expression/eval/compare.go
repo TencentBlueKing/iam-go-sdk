@@ -409,22 +409,23 @@ func LessOrEqual(e1 interface{}, e2 interface{}) bool {
 // float32     the set of all IEEE-754 32-bit floating-point numbers
 // float64     the set of all IEEE-754 64-bit floating-point numbers
 
-func isNumberTypes(i interface{}) bool {
-	switch i.(type) {
-	case uint, uint8, uint16, uint32, uint64, int, int8, int16, int32, int64, float32, float64:
+func isNumberKind(kind reflect.Kind) bool {
+	switch kind {
+	case reflect.Int64, reflect.Float64, reflect.Int, reflect.Float32, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Int8, reflect.Int16, reflect.Int32:
 		return true
 	default:
 		return false
 	}
 }
 
-func isFloatType(i interface{}) bool {
-	switch i.(type) {
-	case float32, float64:
+func isFloatKind(kind reflect.Kind) bool {
+	switch kind {
+	case reflect.Float64, reflect.Float32:
 		return true
 	default:
 		return false
 	}
+
 }
 
 func toInt64(i interface{}) (int64, error) {
@@ -534,8 +535,8 @@ func compareTwoValues(e1 interface{}, e2 interface{}, allowedComparesResults []C
 	// here, we support number types: int64/float64 compare
 	// check and cast to same type: int64 or float64 and do compare later
 	// but, here got a precision lost, which may case the eval result wrong
-	if e1Kind != e2Kind && isNumberTypes(e1) && isNumberTypes(e2) {
-		if isFloatType(e1) || isFloatType(e2) {
+	if e1Kind != e2Kind && isNumberKind(e1Kind) && isNumberKind(e2Kind) {
+		if isFloatKind(e1Kind) || isFloatKind(e2Kind) {
 			// both cast to float64
 			newE1, err := toFloat64(e1)
 			if err == nil {
@@ -548,6 +549,7 @@ func compareTwoValues(e1 interface{}, e2 interface{}, allowedComparesResults []C
 				e2Kind = reflect.Float64
 			}
 		} else {
+			// both cast to int64
 			newE1, err := toInt64(e1)
 			if err == nil {
 				e1 = newE1

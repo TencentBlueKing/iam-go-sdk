@@ -42,6 +42,7 @@ import (
 	"reflect"
 
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -164,6 +165,7 @@ var _ = Describe("Compare", func() {
 		assert.True(GinkgoT(), ValueEquals(float64(1), float64(1)))
 		assert.True(GinkgoT(), ValueEquals(float64(1), 1))
 		assert.True(GinkgoT(), ValueEquals(float64(1), json.Number("1")))
+		assert.True(GinkgoT(), ValueEquals(json.Number("1"), json.Number("1")))
 
 		assert.False(GinkgoT(), ValueEquals(1, 2))
 		assert.False(GinkgoT(), ValueEquals("a", "b"))
@@ -253,6 +255,125 @@ var _ = Describe("Compare", func() {
 		} {
 			assert.False(GinkgoT(), LessOrEqual(currCase.greater, currCase.less))
 		}
+	})
+
+	It("isNumberKind", func() {
+		assert.True(GinkgoT(), isNumberKind(reflect.Uint))
+		assert.True(GinkgoT(), isNumberKind(reflect.Uint8))
+		assert.True(GinkgoT(), isNumberKind(reflect.Uint16))
+		assert.True(GinkgoT(), isNumberKind(reflect.Uint32))
+		assert.True(GinkgoT(), isNumberKind(reflect.Uint64))
+		assert.True(GinkgoT(), isNumberKind(reflect.Int))
+		assert.True(GinkgoT(), isNumberKind(reflect.Int8))
+		assert.True(GinkgoT(), isNumberKind(reflect.Int16))
+		assert.True(GinkgoT(), isNumberKind(reflect.Int32))
+		assert.True(GinkgoT(), isNumberKind(reflect.Int64))
+		assert.True(GinkgoT(), isNumberKind(reflect.Float32))
+		assert.True(GinkgoT(), isNumberKind(reflect.Float64))
+
+		assert.False(GinkgoT(), isNumberKind(reflect.String))
+	})
+
+	It("isFloatKind", func() {
+		assert.True(GinkgoT(), isFloatKind(reflect.Float32))
+		assert.True(GinkgoT(), isFloatKind(reflect.Float64))
+	
+		assert.False(GinkgoT(), isFloatKind(reflect.Uint))
+		assert.False(GinkgoT(), isFloatKind(reflect.Uint8))
+		assert.False(GinkgoT(), isFloatKind(reflect.Uint16))
+		assert.False(GinkgoT(), isFloatKind(reflect.Uint32))
+		assert.False(GinkgoT(), isFloatKind(reflect.Uint64))
+		assert.False(GinkgoT(), isFloatKind(reflect.Int))
+		assert.False(GinkgoT(), isFloatKind(reflect.Int8))
+		assert.False(GinkgoT(), isFloatKind(reflect.Int16))
+		assert.False(GinkgoT(), isFloatKind(reflect.Int32))
+		assert.False(GinkgoT(), isFloatKind(reflect.Int64))
+		assert.False(GinkgoT(), isFloatKind(reflect.String))
+	})
+
+	Context("toInt64", func() {
+		DescribeTable("toInt64 cases", func(expected interface{}, input interface{}, willError bool) {
+			v, err := toInt64(input)
+			if willError {
+				assert.Error(GinkgoT(), err)
+				return
+			}
+			assert.NoError(GinkgoT(), err)
+			assert.Equal(GinkgoT(), expected, v)
+		},
+			Entry("int", int64(8), int(8), false),
+			Entry("int8", int64(8), int8(8), false),
+			Entry("int16", int64(8), int16(8), false),
+			Entry("int32", int64(8), int32(8), false),
+			Entry("int64", int64(8), int64(8), false),
+			Entry("uint", int64(8), uint(8), false),
+			Entry("uint8", int64(8), uint8(8), false),
+			Entry("uint16", int64(8), uint16(8), false),
+			Entry("uint32", int64(8), uint32(8), false),
+			Entry("uint64", int64(8), uint64(8), false),
+
+			Entry("float32", int64(0), float32(8), true),
+			Entry("float64", int64(0), float64(8.31), true),
+			Entry("string", float64(0), "8.31", true),
+		)
+
+	})
+
+	Context("toFloat64", func() {
+		DescribeTable("toFloat64 cases", func(expected interface{}, input interface{}, willError bool) {
+			v, err := toFloat64(input)
+			if willError {
+				assert.Error(GinkgoT(), err)
+				return
+			}
+			assert.NoError(GinkgoT(), err)
+			assert.Equal(GinkgoT(), expected, v)
+		},
+			Entry("int", float64(8), int(8), false),
+			Entry("int8", float64(8), int8(8), false),
+			Entry("int16", float64(8), int16(8), false),
+			Entry("int32", float64(8), int32(8), false),
+			Entry("int64", float64(8), int64(8), false),
+			Entry("uint", float64(8), uint(8), false),
+			Entry("uint8", float64(8), uint8(8), false),
+			Entry("uint16", float64(8), uint16(8), false),
+			Entry("uint32", float64(8), uint32(8), false),
+			Entry("uint64", float64(8), uint64(8), false),
+			Entry("float32", float64(8), float32(8), false),
+			Entry("float64", float64(8.31), float64(8.31), false),
+			Entry("string", float64(0), "8.31", true),
+		)
+	})
+
+	Context("castJsonNumber", func() {
+		It("type wrong", func() {
+			_, _, err := castJsonNumber(123)
+			assert.Error(GinkgoT(), err)
+		})
+
+		It("float64 ok", func() {
+			v, t, err := castJsonNumber(json.Number("123.456"))
+			assert.Equal(GinkgoT(), float64(123.456), v)
+			assert.Equal(GinkgoT(), reflect.Float64, t)
+			assert.NoError(GinkgoT(), err)
+		})
+
+		It("float64 error", func() {
+			_, _, err := castJsonNumber(json.Number("123.4abc"))
+			assert.Error(GinkgoT(), err)
+		})
+
+		It("int64 ok", func() {
+			v, t, err := castJsonNumber(json.Number("123"))
+			assert.Equal(GinkgoT(), int64(123), v)
+			assert.Equal(GinkgoT(), reflect.Int64, t)
+			assert.NoError(GinkgoT(), err)
+		})
+
+		It("int64 wrong", func() {
+			_, _, err := castJsonNumber(json.Number("abc"))
+			assert.Error(GinkgoT(), err)
+		})
 	})
 
 	Context("compareTwoValues", func() {
