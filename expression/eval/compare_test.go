@@ -159,16 +159,16 @@ var _ = Describe("Compare", func() {
 
 	})
 
-	It("ValueEquals", func() {
-		assert.True(GinkgoT(), ValueEquals("a", "a"))
-		assert.True(GinkgoT(), ValueEquals(1, 1))
-		assert.True(GinkgoT(), ValueEquals(float64(1), float64(1)))
-		assert.True(GinkgoT(), ValueEquals(float64(1), 1))
-		assert.True(GinkgoT(), ValueEquals(float64(1), json.Number("1")))
-		assert.True(GinkgoT(), ValueEquals(json.Number("1"), json.Number("1")))
+	It("ValueEqual", func() {
+		assert.True(GinkgoT(), ValueEqual("a", "a"))
+		assert.True(GinkgoT(), ValueEqual(1, 1))
+		assert.True(GinkgoT(), ValueEqual(float64(1), float64(1)))
+		assert.True(GinkgoT(), ValueEqual(float64(1), 1))
+		assert.True(GinkgoT(), ValueEqual(float64(1), json.Number("1")))
+		assert.True(GinkgoT(), ValueEqual(json.Number("1"), json.Number("1")))
 
-		assert.False(GinkgoT(), ValueEquals(1, 2))
-		assert.False(GinkgoT(), ValueEquals("a", "b"))
+		assert.False(GinkgoT(), ValueEqual(1, 2))
+		assert.False(GinkgoT(), ValueEqual("a", "b"))
 	})
 
 	It("GreaterOrEqual", func() {
@@ -277,7 +277,7 @@ var _ = Describe("Compare", func() {
 	It("isFloatKind", func() {
 		assert.True(GinkgoT(), isFloatKind(reflect.Float32))
 		assert.True(GinkgoT(), isFloatKind(reflect.Float64))
-	
+
 		assert.False(GinkgoT(), isFloatKind(reflect.Uint))
 		assert.False(GinkgoT(), isFloatKind(reflect.Uint8))
 		assert.False(GinkgoT(), isFloatKind(reflect.Uint16))
