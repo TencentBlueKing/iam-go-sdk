@@ -1,6 +1,11 @@
 版本日志
 ===============
 
+## IAM v0.0.6
+
+- [NEW] 支持不同类型数值比较
+- [NEW] 增加ValueEquals, 用于不同类型数值比较(原 Equals 只支持相同类型对象比较)
+
 ## IAM v0.0.5
 
 - [NEW] support call apis via APIGateway
