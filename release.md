@@ -1,6 +1,10 @@
 版本日志
 ===============
 
+## IAM v0.0.7
+
+- [CHANGE] rename ValueEquals to ValueEqual
+
 ## IAM v0.0.6
 
 - [NEW] 支持不同类型数值比较
