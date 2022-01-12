@@ -1,6 +1,10 @@
 版本日志
 ===============
 
+## IAM v0.0.8
+
+- [BUGFIX] compareTwoValues will panic if got nil as input
+
 ## IAM v0.0.7
 
 - [CHANGE] rename ValueEquals to ValueEqual
