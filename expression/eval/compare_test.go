@@ -388,6 +388,8 @@ var _ = Describe("Compare", func() {
 				{v1: "abc", v2: 123456},
 				{v1: float64(12), v2: "123"},
 				{v1: "float(12)", v2: float64(1)},
+				{v1: nil, v2: float64(1)},
+				{v1: "abc", v2: nil},
 			} {
 				compareResult := compareTwoValues(currCase.v1, currCase.v2, []CompareType{compareLess, compareEqual, compareGreater})
 				assert.False(GinkgoT(), compareResult)
