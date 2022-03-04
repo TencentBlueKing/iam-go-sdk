@@ -15,7 +15,6 @@ import (
 	"net/http"
 
 	"github.com/TencentBlueKing/gopkg/conv"
-	"github.com/TencentBlueKing/gopkg/stringx"
 	"github.com/parnurzeal/gorequest"
 	"moul.io/http2curl"
 
@@ -25,7 +24,6 @@ import (
 const (
 	maxResponseBodyLength = 10240
 )
-
 
 // AsCurlCommand returns a string representing the runnable `curl' command
 // version of the request.
@@ -50,8 +48,8 @@ func logFailHTTPRequest(
 	response gorequest.Response,
 	respBody []byte,
 	errs []error,
-	data responseBody
-	) {
+	data responseBody,
+) {
 
 	dump, err := AsCurlCommand(request)
 	if err != nil {
