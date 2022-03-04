@@ -101,11 +101,11 @@ func (c *esbClient) call(
 	request.Data["bk_username"] = bkUsername
 
 	// do request
-	resp, _, errs := request.
+	resp, respBody, errs := request.
 		Send(data).
 		EndStruct(&result, callbackFunc)
 
-	logFailHTTPRequest(request, resp, errs, &result)
+	logFailHTTPRequest(request, resp, respBody, errs, &result)
 
 	if len(errs) != 0 {
 		return nil, fmt.Errorf("gorequest errors=`%s`", errs)

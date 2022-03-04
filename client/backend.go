@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TencentBlueKing/gopkg/conv"
 	"github.com/parnurzeal/gorequest"
 
 	"github.com/TencentBlueKing/iam-go-sdk/logger"
@@ -58,7 +59,7 @@ func (r *IAMBackendBaseResponse) Error() error {
 
 // String will return the detail text of the response
 func (r *IAMBackendBaseResponse) String() string {
-	return fmt.Sprintf("response[code=`%d`, message=`%s`, data=`%s`]", r.Code, r.Message, util.BytesToString(r.Data))
+	return fmt.Sprintf("response[code=`%d`, message=`%s`, data=`%s`]", r.Code, r.Message, conv.BytesToString(r.Data))
 }
 
 // IAMBackendClient is the interface of iam backend client
@@ -134,7 +135,7 @@ func (c *iamBackendClient) call(
 			return fmt.Errorf("generate apigateway call header fail. err=`%s`", err)
 		}
 
-		headers["X-Bkapi-Authorization"] = util.BytesToString(auth)
+		headers["X-Bkapi-Authorization"] = conv.BytesToString(auth)
 	} else {
 		headers["X-BK-APP-CODE"] = c.appCode
 		headers["X-BK-APP-SECRET"] = c.appSecret
@@ -169,25 +170,31 @@ func (c *iamBackendClient) call(
 
 	// do request
 	baseResult := IAMBackendBaseResponse{}
-	resp, _, errs := request.
+	resp, respBody, errs := request.
 		EndStruct(&baseResult, callbackFunc)
 
 	duration := time.Since(start)
 
-	logFailHTTPRequest(request, resp, errs, &baseResult)
+	logFailHTTPRequest(request, resp, respBody, errs, &baseResult)
 
 	logger.Debugf("http request result: %+v", baseResult.String())
 	logger.Debugf("http request took %v ms", float64(duration/time.Millisecond))
+	logger.Debugf("http response: status_code=%s, body=%+v", resp.StatusCode, conv.BytesToString(respBody))
 
 	if len(errs) != 0 {
 		return fmt.Errorf("gorequest errors=`%s`", errs)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("gorequest statusCode is %d not 200", resp.StatusCode)
+		err := fmt.Errorf("gorequest statusCode is %d not 200", resp.StatusCode)
+		if baseResult.Message != "" {
+			err = fmt.Errorf("%w. response body.code: %d, message:%s", err, baseResult.Code, baseResult.Message)
+		}
+
+		return err
 	}
 
 	if baseResult.Code != 0 {
-		return errors.New(baseResult.Message)
+		return fmt.Errorf("response body.code: %d, message:%s", baseResult.Code, baseResult.Message)
 	}
 
 	err := json.Unmarshal(baseResult.Data, responseData)
