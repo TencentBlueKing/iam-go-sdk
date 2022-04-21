@@ -14,10 +14,15 @@ package client
 import (
 	"net/http"
 
+	"github.com/TencentBlueKing/gopkg/conv"
 	"github.com/parnurzeal/gorequest"
 	"moul.io/http2curl"
 
 	"github.com/TencentBlueKing/iam-go-sdk/logger"
+)
+
+const (
+	maxResponseBodyLength = 10240
 )
 
 // AsCurlCommand returns a string representing the runnable `curl' command
@@ -38,7 +43,13 @@ func AsCurlCommand(request *gorequest.SuperAgent) (string, error) {
 	return cmd.String(), nil
 }
 
-func logFailHTTPRequest(request *gorequest.SuperAgent, response gorequest.Response, errs []error, data responseBody) {
+func logFailHTTPRequest(
+	request *gorequest.SuperAgent,
+	response gorequest.Response,
+	respBody []byte,
+	errs []error,
+	data responseBody,
+) {
 
 	dump, err := AsCurlCommand(request)
 	if err != nil {
@@ -52,6 +63,12 @@ func logFailHTTPRequest(request *gorequest.SuperAgent, response gorequest.Respon
 		requestID = response.Header.Get("X-Request-Id")
 	}
 
+	// response body
+	respBodyStr := ""
+	if respBody != nil {
+		respBodyStr = conv.BytesToString(respBody[:maxResponseBodyLength])
+	}
+
 	responseBodyError := data.Error()
 
 	if len(errs) != 0 || status != http.StatusOK || responseBodyError != nil {
@@ -59,10 +76,12 @@ func logFailHTTPRequest(request *gorequest.SuperAgent, response gorequest.Respon
 		if responseBodyError != nil {
 			message = responseBodyError.Error()
 		}
-		logger.Errorf("[http request fail] %s! status=`%d`, errs=`%v`, request_id=`%s`, request=`%s`",
-			message, status, errs, requestID, dump)
+		logger.Errorf(
+			"[http request fail] %s! status=`%d`, errs=`%v`, request_id=`%s`, request=`%s`, responseBody=`%s`",
+			message, status, errs, requestID, dump, respBodyStr)
 	} else {
-		logger.Debugf("[http request] %s! status=`%d`, errs=`%v`, request_id=`%s`, request=`%s`",
-			status, errs, requestID, dump)
+		logger.Debugf(
+			"[http request] %s! status=`%d`, errs=`%v`, request_id=`%s`, request=`%s`, responseBody=`%s`",
+			status, errs, requestID, dump, respBodyStr)
 	}
 }

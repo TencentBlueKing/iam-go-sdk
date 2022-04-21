@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TencentBlueKing/gopkg/stringx"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 
@@ -24,7 +25,6 @@ import (
 	"github.com/TencentBlueKing/iam-go-sdk/client"
 	"github.com/TencentBlueKing/iam-go-sdk/expression"
 	"github.com/TencentBlueKing/iam-go-sdk/logger"
-	"github.com/TencentBlueKing/iam-go-sdk/util"
 )
 
 // IAM is the instance of iam sdk
@@ -35,7 +35,7 @@ type IAM struct {
 	client client.IAMBackendClient
 
 	// TODO: remove this after all changed to APIGateway
-	esbClient        client.ESBClient
+	esbClient client.ESBClient
 }
 
 // NewIAM will create an IAM instance
@@ -48,8 +48,8 @@ func NewIAM(system string, appCode, appSecret, bkIAMHost, bkPaaSHost string) *IA
 		appCode:   appCode,
 		appSecret: appSecret,
 
-		client: iamBackendClient,
-		esbClient:        esbClient,
+		client:    iamBackendClient,
+		esbClient: esbClient,
 	}
 }
 
@@ -62,8 +62,8 @@ func NewAPIGatewayIAM(system string, appCode, appSecret, bkAPIGatewayURL string)
 		appCode:   appCode,
 		appSecret: appSecret,
 
-		client: apigatewayClient,
-		esbClient:        nil,
+		client:    apigatewayClient,
+		esbClient: nil,
 	}
 }
 
@@ -288,7 +288,7 @@ func (i *IAM) IsBasicAuthAllowed(username, password string) (err error) {
 
 	if password != token {
 		err = fmt.Errorf("password in basic_auth not equals to system token [password=%s***, token=%s***]",
-			util.TruncateString(password, 6), util.TruncateString(token, 6))
+			stringx.Truncate(password, 6), stringx.Truncate(token, 6))
 		return
 	}
 
