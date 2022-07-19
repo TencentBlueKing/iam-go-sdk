@@ -243,6 +243,26 @@ var _ = Describe("Expr", func() {
 						})
 						assert.False(GinkgoT(), e.Eval(o))
 					})
+
+					It("gte, policyValue is an array, always False", func() {
+						e = &expression.ExprCell{
+							OP:    operator.Gte,
+							Field: "obj.age",
+							Value: []int{18},
+						}
+
+						// hit, but false
+						o.Set("obj", map[string]interface{}{
+							"age": 18,
+						})
+						assert.False(GinkgoT(), e.Eval(o))
+
+						// miss
+						o.Set("obj", map[string]interface{}{
+							"age": 17,
+						})
+						assert.False(GinkgoT(), e.Eval(o))
+					})
 				})
 			})
 

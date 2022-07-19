@@ -107,22 +107,23 @@ func evalBinaryOperator(op operator.OP, field string, policyValue interface{}, d
 	switch op {
 	case operator.Any:
 		return true
-	case operator.Eq, operator.Lt, operator.Lte, operator.Gt, operator.Gte:
-		// a op b
-		// a and b both can be a single value or an array
-		return evalPositive(op, objectValue, policyValue)
-	case operator.NotEq:
-		// a not_eq b
-		// a and b both can be a single value or an array
-		return evalNegative(op, objectValue, policyValue)
-	case operator.StartsWith, operator.EndsWith, operator.StringContains:
+	case operator.Eq,
+		operator.Lt,
+		operator.Lte,
+		operator.Gt,
+		operator.Gte,
+		operator.StartsWith,
+		operator.EndsWith,
+		operator.StringContains:
 		// a starts_with b, a not_starts_with, a ends_with b, a not_ends_with b
 		// b should be a single value, while a can be a single value or an array
 		if isValueTypeArray(policyValue) {
 			return false
 		}
 		return evalPositive(op, objectValue, policyValue)
-	case operator.NotStartsWith, operator.NotEndsWith:
+	case operator.NotEq, operator.NotStartsWith, operator.NotEndsWith:
+		// a not_eq b
+		// a can be a single value or an array, be should be a single value
 		if isValueTypeArray(policyValue) {
 			return false
 		}
