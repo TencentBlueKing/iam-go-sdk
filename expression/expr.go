@@ -103,6 +103,7 @@ func evalBinaryOperator(op operator.OP, field string, policyValue interface{}, d
 		}
 	}
 
+	// NOTE: if you add new operator, read this first: https://github.com/TencentBlueKing/bk-iam-saas/issues/1293
 	switch op {
 	case operator.Any:
 		return true
