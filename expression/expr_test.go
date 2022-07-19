@@ -246,7 +246,6 @@ var _ = Describe("Expr", func() {
 				})
 			})
 
-			// TODO: add policyValue is an array cases
 			Context("starts_with/ends_with", func() {
 				It("starts_with", func() {
 					e = &expression.ExprCell{
@@ -268,6 +267,25 @@ var _ = Describe("Expr", func() {
 					assert.False(GinkgoT(), e.Eval(o))
 
 					// NOTE: _bk_iam_path_ with starts_with
+				})
+				It("starts_with policy value is not a single value", func() {
+					e = &expression.ExprCell{
+						OP:    operator.StartsWith,
+						Field: "obj.name",
+						Value: []string{"hello"},
+					}
+
+					// hit
+					o.Set("obj", map[string]interface{}{
+						"name": "hello world",
+					})
+					assert.False(GinkgoT(), e.Eval(o))
+
+					// miss
+					o.Set("obj", map[string]interface{}{
+						"name": "foo bar",
+					})
+					assert.False(GinkgoT(), e.Eval(o))
 				})
 				It("starts_with with _bk_iam_path_", func() {
 					e = &expression.ExprCell{
@@ -294,6 +312,26 @@ var _ = Describe("Expr", func() {
 						"name": "world hello",
 					})
 					assert.True(GinkgoT(), e.Eval(o))
+
+					// miss
+					o.Set("obj", map[string]interface{}{
+						"name": "foo bar",
+					})
+					assert.False(GinkgoT(), e.Eval(o))
+				})
+
+				It("ends_with policyValue is not a single value", func() {
+					e = &expression.ExprCell{
+						OP:    operator.EndsWith,
+						Field: "obj.name",
+						Value: []string{"hello"},
+					}
+
+					// hit
+					o.Set("obj", map[string]interface{}{
+						"name": "world hello",
+					})
+					assert.False(GinkgoT(), e.Eval(o))
 
 					// miss
 					o.Set("obj", map[string]interface{}{
@@ -399,6 +437,26 @@ var _ = Describe("Expr", func() {
 						})
 						assert.False(GinkgoT(), e.Eval(o))
 					})
+					It("not_starts_with policyValue is not a single value", func() {
+						e = &expression.ExprCell{
+							OP:    operator.NotStartsWith,
+							Field: "obj.name",
+							Value: []string{"hello"},
+						}
+
+						// hit
+						o.Set("obj", map[string]interface{}{
+							"name": "foo bar",
+						})
+						assert.False(GinkgoT(), e.Eval(o))
+
+						// miss
+						o.Set("obj", map[string]interface{}{
+							"name": "hello world",
+						})
+						assert.False(GinkgoT(), e.Eval(o))
+					})
+
 					It("not_ends_with", func() {
 						e = &expression.ExprCell{
 							OP:    operator.NotEndsWith,
@@ -411,6 +469,26 @@ var _ = Describe("Expr", func() {
 							"name": "foo bar",
 						})
 						assert.True(GinkgoT(), e.Eval(o))
+
+						// miss
+						o.Set("obj", map[string]interface{}{
+							"name": "world hello",
+						})
+						assert.False(GinkgoT(), e.Eval(o))
+					})
+
+					It("not_ends_with policyValue is not a single value", func() {
+						e = &expression.ExprCell{
+							OP:    operator.NotEndsWith,
+							Field: "obj.name",
+							Value: []string{"hello"},
+						}
+
+						// hit
+						o.Set("obj", map[string]interface{}{
+							"name": "foo bar",
+						})
+						assert.False(GinkgoT(), e.Eval(o))
 
 						// miss
 						o.Set("obj", map[string]interface{}{
