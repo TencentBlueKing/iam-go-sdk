@@ -341,6 +341,57 @@ var _ = Describe("Expr", func() {
 				})
 			})
 
+			Context("string_contains", func() {
+				It("string_contains", func() {
+					e = &expression.ExprCell{
+						OP:    operator.StringContains,
+						Field: "obj.name",
+						Value: "hello",
+					}
+
+					// hit
+					o.Set("obj", map[string]interface{}{
+						"name": "hello world",
+					})
+					assert.True(GinkgoT(), e.Eval(o))
+
+					o.Set("obj", map[string]interface{}{
+						"name": "world hello",
+					})
+					assert.True(GinkgoT(), e.Eval(o))
+
+					o.Set("obj", map[string]interface{}{
+						"name": "worldhelloworld",
+					})
+					assert.True(GinkgoT(), e.Eval(o))
+
+					// miss
+					o.Set("obj", map[string]interface{}{
+						"name": "foo bar",
+					})
+					assert.False(GinkgoT(), e.Eval(o))
+				})
+				It("string_contains policy value is not a single value", func() {
+					e = &expression.ExprCell{
+						OP:    operator.StringContains,
+						Field: "obj.name",
+						Value: []string{"hello"},
+					}
+
+					// hit
+					o.Set("obj", map[string]interface{}{
+						"name": "hello world",
+					})
+					assert.False(GinkgoT(), e.Eval(o))
+
+					// miss
+					o.Set("obj", map[string]interface{}{
+						"name": "foo bar",
+					})
+					assert.False(GinkgoT(), e.Eval(o))
+				})
+			})
+
 			Context("in", func() {
 				It("ok", func() {
 					e = &expression.ExprCell{
@@ -714,6 +765,25 @@ func BenchmarkExprCellLessDifferentTypeJsonNumber(b *testing.B) {
 }
 
 func BenchmarkExprCellStartsWith(b *testing.B) {
+	e := &expression.ExprCell{
+		OP:    operator.StartsWith,
+		Field: "obj.name",
+		Value: "hello",
+	}
+
+	o := expression.NewObjectSet()
+	o.Set("obj", map[string]interface{}{
+		"name": "helloworld",
+	})
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		e.Eval(o)
+	}
+}
+
+func BenchmarkExprCellStringContains(b *testing.B) {
 	e := &expression.ExprCell{
 		OP:    operator.StartsWith,
 		Field: "obj.name",

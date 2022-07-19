@@ -114,7 +114,7 @@ func evalBinaryOperator(op operator.OP, field string, policyValue interface{}, d
 		// a not_eq b
 		// a and b both can be a single value or an array
 		return evalNegative(op, objectValue, policyValue)
-	case operator.StartsWith, operator.EndsWith:
+	case operator.StartsWith, operator.EndsWith, operator.StringContains:
 		// a starts_with b, a not_starts_with, a ends_with b, a not_ends_with b
 		// b should be a single value, while a can be a single value or an array
 		if isValueTypeArray(policyValue) {
@@ -191,6 +191,8 @@ func evalPositive(op operator.OP, objectValue, policyValue interface{}) bool {
 		evalFunc = eval.StartsWith
 	case operator.EndsWith:
 		evalFunc = eval.EndsWith
+	case operator.StringContains:
+		evalFunc = eval.StringContains
 	case operator.In:
 		evalFunc = eval.In
 	}

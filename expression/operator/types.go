@@ -32,6 +32,8 @@ var (
 	EndsWith    OP = "ends_with"
 	NotEndsWith OP = "not_ends_with"
 
+	StringContains OP = "string_contains"
+
 	Lt  OP = "lt"
 	Lte OP = "lte"
 	Gt  OP = "gt"

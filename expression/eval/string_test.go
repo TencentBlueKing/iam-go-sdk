@@ -17,7 +17,6 @@ import (
 )
 
 var _ = Describe("String", func() {
-
 	It("convertArgsToString", func() {
 		_, _, ok := convertArgsToString(1, "")
 		assert.False(GinkgoT(), ok)
@@ -49,4 +48,11 @@ var _ = Describe("String", func() {
 		assert.True(GinkgoT(), NotEndsWith("hello", "abc"))
 	})
 
+	It("StringContains", func() {
+		assert.False(GinkgoT(), StringContains("", 1))
+		assert.True(GinkgoT(), StringContains("hello", "he"))
+		assert.True(GinkgoT(), StringContains("hello", "el"))
+		assert.True(GinkgoT(), StringContains("hello", "lo"))
+		assert.False(GinkgoT(), StringContains("hello", "abc"))
+	})
 })
