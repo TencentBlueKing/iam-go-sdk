@@ -36,7 +36,6 @@ type ExprCell struct {
 
 // Eval will evaluate the expression with ObjectSet, return true or false
 func (e *ExprCell) Eval(data ObjectSetInterface) bool {
-
 	switch e.OP {
 
 	case operator.AND:
@@ -56,7 +55,6 @@ func (e *ExprCell) Eval(data ObjectSetInterface) bool {
 	default:
 		return evalBinaryOperator(e.OP, e.Field, e.Value, data)
 	}
-
 }
 
 // String return the text of expression cell
@@ -105,25 +103,64 @@ func evalBinaryOperator(op operator.OP, field string, policyValue interface{}, d
 		}
 	}
 
+	// NOTE: if you add new operator, read this first: https://github.com/TencentBlueKing/bk-iam-saas/issues/1293
 	switch op {
 	case operator.Any:
 		return true
-	case operator.Eq, operator.Lt, operator.Lte, operator.Gt, operator.Gte:
+	case operator.Eq,
+		operator.Lt,
+		operator.Lte,
+		operator.Gt,
+		operator.Gte,
+		operator.StartsWith,
+		operator.EndsWith,
+		operator.StringContains:
+		// a starts_with b, a not_starts_with, a ends_with b, a not_ends_with b
+		// b should be a single value, while a can be a single value or an array
+		if isValueTypeArray(policyValue) {
+			return false
+		}
 		return evalPositive(op, objectValue, policyValue)
-	case operator.StartsWith, operator.EndsWith, operator.In:
+	case operator.NotEq, operator.NotStartsWith, operator.NotEndsWith:
+		// a not_eq b
+		// a can be a single value or an array, be should be a single value
+		if isValueTypeArray(policyValue) {
+			return false
+		}
+		return evalNegative(op, objectValue, policyValue)
+	case operator.In:
+		// a in b, a not_in b
+		// b should be an array, while a can be a single or an array
+		// so we should make the in expression b always be an array
+		if !isValueTypeArray(policyValue) {
+			return false
+		}
 		return evalPositive(op, objectValue, policyValue)
-	case operator.NotEq, operator.NotStartsWith, operator.NotEndsWith, operator.NotIn:
+	case operator.NotIn:
+		if !isValueTypeArray(policyValue) {
+			return false
+		}
 		return evalNegative(op, objectValue, policyValue)
 	case operator.Contains:
+		// a contains b,  a not_contains b
+		// a should be an array, b should be a single value
+		// so, we should make the contains expression b always be a single string, while a can be a single value or an array
+		if !isValueTypeArray(objectValue) || isValueTypeArray(policyValue) {
+			return false
+		}
 		// NOTE: objectValue is an array, policyValue is single value
 		return eval.Contains(objectValue, policyValue)
 	case operator.NotContains:
+		if !isValueTypeArray(objectValue) || isValueTypeArray(policyValue) {
+			return false
+		}
 		// NOTE: objectValue is an array, policyValue is single value
 		return eval.NotContains(objectValue, policyValue)
 	default:
 		return false
 	}
 }
+
 func isValueTypeArray(v interface{}) bool {
 	if v == nil {
 		return false
@@ -156,14 +193,16 @@ func evalPositive(op operator.OP, objectValue, policyValue interface{}) bool {
 		evalFunc = eval.StartsWith
 	case operator.EndsWith:
 		evalFunc = eval.EndsWith
+	case operator.StringContains:
+		evalFunc = eval.StringContains
 	case operator.In:
 		evalFunc = eval.In
 	}
 
-	// NOTE: here, the policyValue should not be array! It's single value (the In op policyValue is an array)
-	//fmt.Println("objectValue isValueTypeArray", objectValue, isValueTypeArray(objectValue))
+	// NOTE: here, the policyValue should not be array! It's single value (except: the In op policyValue is an array)
+	// fmt.Println("objectValue isValueTypeArray", objectValue, isValueTypeArray(objectValue))
 	if isValueTypeArray(objectValue) {
-		//fmt.Println("objectValue is an array", objectValue)
+		// fmt.Println("objectValue is an array", objectValue)
 		listValue := reflect.ValueOf(objectValue)
 		for i := 0; i < listValue.Len(); i++ {
 			if evalFunc(listValue.Index(i).Interface(), policyValue) {
@@ -193,7 +232,7 @@ func evalNegative(op operator.OP, objectValue, policyValue interface{}) bool {
 		evalFunc = eval.NotIn
 	}
 
-	// NOTE: here, the policyValue should not be array! It's single value (the In op policyValue is an array)
+	// NOTE: here, the policyValue should not be array! It's single value (except: the NotIn op policyValue is an array)
 	if isValueTypeArray(objectValue) {
 		listValue := reflect.ValueOf(objectValue)
 		for i := 0; i < listValue.Len(); i++ {
