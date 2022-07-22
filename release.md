@@ -1,6 +1,11 @@
 版本日志
 ===============
 
+## IAM v0.0.9
+
+- [NEW] 支持StringContains 操作符 #25
+- [OTHERS] 规范化所有操作符左值/右值, 并增加校验(校验失败直接False)
+
 ## IAM v0.0.8
 
 - [BUGFIX] compareTwoValues will panic if got nil as input
