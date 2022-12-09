@@ -66,7 +66,11 @@ func logFailHTTPRequest(
 	// response body
 	respBodyStr := ""
 	if respBody != nil {
-		respBodyStr = conv.BytesToString(respBody[:maxResponseBodyLength])
+		maxLen := maxResponseBodyLength
+		if len(respBody) < maxResponseBodyLength {
+			maxLen = len(respBody)
+		}
+		respBodyStr = conv.BytesToString(respBody[:maxLen])
 	}
 
 	responseBodyError := data.Error()
