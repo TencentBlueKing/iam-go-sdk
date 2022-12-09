@@ -15,6 +15,7 @@ import (
 	"net/http"
 
 	"github.com/TencentBlueKing/gopkg/conv"
+	"github.com/TencentBlueKing/gopkg/stringx"
 	"github.com/parnurzeal/gorequest"
 	"moul.io/http2curl"
 
@@ -66,11 +67,7 @@ func logFailHTTPRequest(
 	// response body
 	respBodyStr := ""
 	if respBody != nil {
-		maxLen := maxResponseBodyLength
-		if len(respBody) < maxResponseBodyLength {
-			maxLen = len(respBody)
-		}
-		respBodyStr = conv.BytesToString(respBody[:maxLen])
+		respBodyStr = stringx.Truncate(conv.BytesToString(respBody), maxResponseBodyLength)
 	}
 
 	responseBodyError := data.Error()
