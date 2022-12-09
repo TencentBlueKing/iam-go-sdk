@@ -51,8 +51,6 @@ BenchmarkExprCellIn-12            	 2872075	       411 ns/op	      64 B/op	     
 
 - [版本日志](release.md)
 
-<<<<<<< HEAD
-=======
 ## IAM Repos
 
 - [TencentBlueKing/bk-iam](https://github.com/TencentBlueKing/bk-iam)
@@ -64,7 +62,6 @@ BenchmarkExprCellIn-12            	 2872075	       411 ns/op	      64 B/op	     
 - [TencentBlueKing/iam-php-sdk](https://github.com/TencentBlueKing/iam-php-sdk)
 - [TencentBlueKing/iam-java-sdk](https://github.com/TencentBlueKing/iam-java-sdk)
 
->>>>>>> 71a247d... docs: update readme add java sdk
 ## Support
 
 - [蓝鲸论坛](https://bk.tencent.com/s-mart/community)
