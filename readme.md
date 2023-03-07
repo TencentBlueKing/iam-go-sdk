@@ -60,6 +60,7 @@ BenchmarkExprCellIn-12            	 2872075	       411 ns/op	      64 B/op	     
 - [TencentBlueKing/iam-python-sdk](https://github.com/TencentBlueKing/iam-python-sdk)
 - [TencentBlueKing/iam-go-sdk](https://github.com/TencentBlueKing/iam-go-sdk)
 - [TencentBlueKing/iam-php-sdk](https://github.com/TencentBlueKing/iam-php-sdk)
+- [TencentBlueKing/iam-java-sdk](https://github.com/TencentBlueKing/iam-java-sdk)
 
 ## Support
 
