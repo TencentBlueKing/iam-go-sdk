@@ -80,7 +80,7 @@ func (i *IAM) IsAllowed(request Request) (allowed bool, err error) {
 
 	// 2. policy query
 	logger.Debugf("the request: %v", request)
-	data, err := i.client.PolicyQuery(request)
+	data, err := i.client.V2PolicyQuery(request.System, request)
 	if err != nil {
 		logger.Errorf("do policy query fail! err=%w", err)
 		return
@@ -146,7 +146,7 @@ func (i *IAM) BatchIsAllowed(request Request, resourcesList []Resources) (result
 		request.Resources = Resources{}
 	}
 
-	data, err := i.client.PolicyQuery(request)
+	data, err := i.client.V2PolicyQuery(request.System, request)
 	if err != nil {
 		return
 	}
@@ -193,7 +193,7 @@ func (i *IAM) ResourceMultiActionsAllowed(request MultiActionRequest) (result ma
 
 	// 2. batch action policy query
 	logger.Debugf("the request: %v", request)
-	data, err := i.client.PolicyQueryByActions(request)
+	data, err := i.client.V2PolicyQueryByActions(request.System, request)
 	if err != nil {
 		logger.Errorf("do policy query by actions fail! err=%w", err)
 		return
@@ -237,7 +237,7 @@ func (i *IAM) BatchResourceMultiActionsAllowed(
 
 	// 3. batch action policy query
 	logger.Debugf("the request: %v", request)
-	data, err := i.client.PolicyQueryByActions(request)
+	data, err := i.client.V2PolicyQueryByActions(request.System, request)
 	if err != nil {
 		logger.Errorf("do policy query by actions fail! err=%w", err)
 		return
