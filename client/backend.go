@@ -70,6 +70,10 @@ type IAMBackendClient interface {
 	PolicyQuery(body interface{}) (map[string]interface{}, error)
 	PolicyQueryByActions(body interface{}) ([]map[string]interface{}, error)
 
+	V2PolicyQuery(system string, body interface{}) (data map[string]interface{}, err error)
+	V2PolicyQueryByActions(system string, body interface{}) (data []map[string]interface{}, err error)
+	V2PolicyAuth(system string, body interface{}) (data map[string]interface{}, err error)
+
 	PolicyAuth(body interface{}) (data map[string]interface{}, err error)
 	PolicyAuthByResources(body interface{}) (data map[string]interface{}, err error)
 	PolicyAuthByActions(body interface{}) (data map[string]interface{}, err error)
@@ -269,6 +273,13 @@ func (c *iamBackendClient) PolicyQuery(body interface{}) (data map[string]interf
 	return
 }
 
+// V2PolicyQuery will do policy query
+func (c *iamBackendClient) V2PolicyQuery(system string, body interface{}) (data map[string]interface{}, err error) {
+	path := "/api/v2/policy/systems/" + system + "/query/"
+	data, err = c.callWithReturnMapData(POST, path, body, 10)
+	return
+}
+
 // PolicyQueryByActions will do policy query by actions
 func (c *iamBackendClient) PolicyQueryByActions(body interface{}) (data []map[string]interface{}, err error) {
 	path := "/api/v1/policy/query_by_actions"
@@ -276,9 +287,23 @@ func (c *iamBackendClient) PolicyQueryByActions(body interface{}) (data []map[st
 	return
 }
 
+// V2PolicyQueryByActions will do policy query by actions
+func (c *iamBackendClient) V2PolicyQueryByActions(system string, body interface{}) (data []map[string]interface{}, err error) {
+	path := "/api/v2/policy/systems/" + system + "/query_by_actions/"
+	data, err = c.callWithReturnSliceMapData(POST, path, body, 10)
+	return
+}
+
 // PolicyAuth will do policy auth
 func (c *iamBackendClient) PolicyAuth(body interface{}) (data map[string]interface{}, err error) {
 	path := "/api/v1/policy/auth"
+	data, err = c.callWithReturnMapData(POST, path, body, 10)
+	return
+}
+
+// V2PolicyAuth will do policy auth
+func (c *iamBackendClient) V2PolicyAuth(system string, body interface{}) (data map[string]interface{}, err error) {
+	path := "/api/v2/policy/systems/" + system + "/auth/"
 	data, err = c.callWithReturnMapData(POST, path, body, 10)
 	return
 }
