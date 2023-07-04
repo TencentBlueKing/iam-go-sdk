@@ -25,3 +25,16 @@ func Int64ArrayToString(input []int64, sep string) string {
 
 	return strings.Join(b, ",")
 }
+
+// Contains checks if an element exists in a given slice.
+//
+// The function takes a slice of elements and a target value. It returns a boolean
+// value indicating whether the target value is present in the slice or not.
+func Contains[T comparable](elems []T, v T) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
