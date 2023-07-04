@@ -12,73 +12,65 @@
 package iammigrate
 
 import (
-	"bytes"
-	"testing"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestFormatData(t *testing.T) {
-	testCases := []struct {
-		name        string
-		data        []byte
-		templateVar interface{}
-		expected    []byte
-		expectedErr bool
-	}{
-		{
-			name: "ValidTemplate",
-			data: []byte(`{{.Name}}, {{.Age}}`),
-			templateVar: struct {
-				Name string
-				Age  int
-			}{
-				Name: "John",
-				Age:  30,
-			},
-			expected: []byte(`John, 30`),
-		},
-		{
-			name: "EmptyTemplate",
-			data: []byte(``),
-			templateVar: struct {
-				Name string
-				Age  int
-			}{
-				Name: "John",
-				Age:  30,
-			},
-			expected: []byte(``),
-		},
-		{
-			name:        "EmptyVar",
-			data:        []byte(`{{.Name}}, {{.Age}}`),
-			templateVar: nil,
-			expected:    []byte(`{{.Name}}, {{.Age}}`),
-		},
-		{
-			name: "InvalidTemplate",
-			data: []byte(`{{.Name}, {{.Age}}`),
-			templateVar: struct {
-				Name string
-				Age  int
-			}{
-				Name: "John",
-				Age:  30,
-			},
-			expected:    nil,
-			expectedErr: true,
-		},
-	}
+var _ = Describe("Migrations", func() {
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			result, err := FormatData(tc.data, tc.templateVar)
-			if tc.expectedErr != (err != nil) {
-				t.Errorf("%s unexpected error: got %v, want %v", tc.name, err, tc.expectedErr)
-			}
+	Describe("FormatData", func() {
 
-			if !bytes.Equal(result, tc.expected) {
-				t.Errorf("%s unexpected result: got %s, want %s", tc.name, result, tc.expected)
-			}
-		})
-	}
-}
+		DescribeTable("ValidTemplate", func(expected []byte, data []byte, tempVar interface{}) {
+			got, err := FormatData(data, tempVar)
+			assert.NoError(GinkgoT(), err)
+			assert.Equal(GinkgoT(), expected, got)
+		},
+			Entry("ValidTemplate", []byte("John, 30"), []byte(`{{.Name}}, {{.Age}}`), struct {
+				Name string
+				Age  int
+			}{
+				Name: "John",
+				Age:  30,
+			}),
+		)
+
+		DescribeTable("EmptyTemplate", func(expected []byte, data []byte, tempVar interface{}) {
+			got, err := FormatData(data, tempVar)
+			assert.NoError(GinkgoT(), err)
+			assert.Equal(GinkgoT(), expected, got)
+		},
+			Entry("EmptyTemplate", []byte(nil), []byte(``), struct {
+				Name string
+				Age  int
+			}{
+				Name: "John",
+				Age:  30,
+			}),
+		)
+
+		DescribeTable("EmptyVar", func(expected []byte, data []byte, tempVar interface{}) {
+			got, err := FormatData(data, tempVar)
+			assert.NoError(GinkgoT(), err)
+			assert.Equal(GinkgoT(), expected, got)
+		},
+			Entry("EmptyVar", []byte("{{.Name}}, {{.Age}}"), []byte(`{{.Name}}, {{.Age}}`), nil),
+		)
+
+		DescribeTable("InvalidTemplate", func(expected []byte, data []byte, tempVar interface{}) {
+			got, err := FormatData(data, tempVar)
+			assert.Error(GinkgoT(), err)
+			assert.Equal(GinkgoT(), expected, got)
+		},
+			Entry("InvalidTemplate", nil, []byte(`{{.Name}, {{.Age}}`), struct {
+				Name string
+				Age  int
+			}{
+				Name: "John",
+				Age:  30,
+			}),
+		)
+
+	})
+
+})
