@@ -258,6 +258,23 @@ token, err := i.GetToken()
 fmt.Println("GetToken:", token, err)
 ```
 
+### 3.5 使用 migrate 注册权限模型
+
+```go
+db := &sql.DB{} // 初始化 migrate 数据库
+migrationsTable := "bk_iam_migrations" // migrate 表名
+migrationsDir := "./migrations" // migrations 文件目录
+timeout := 5*time.Minute // 超时时间
+tempVar := map[string]interface{}{"SYSTEM_ID": "demo"} // 模板参数
+err := i.Migrate(db, migrationsTable, migrationsDir, timeout, tempVar)
+```
+
+权限模型 migrations 文件参考: [migrations](../iammigrate/testdata/0000_init.up.json)
+
+文件格式: `{version}_{name}_up.json`，version 从 `0` 开始。
+
+migration 文件支持 go 模板参数，可以在 migrations 文件中定义，并通过 `Migrate` `templateVar` 参数上传入，程序将自动渲染模板。
+
 ## 4. SDK 增强
 
 ### 注册metrics

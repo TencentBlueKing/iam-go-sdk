@@ -27,6 +27,8 @@ import (
 	"github.com/TencentBlueKing/iam-go-sdk/util"
 )
 
+var _ IAMBackendClient = &iamBackendClient{}
+
 const (
 	bkIAMVersion = "1"
 )
@@ -39,6 +41,10 @@ var (
 	POST Method = "POST"
 	// GET http get
 	GET Method = "GET"
+	// PUT http put
+	PUT Method = "PUT"
+	// DELETE http delete
+	DELETE Method = "DELETE"
 )
 
 // IAMBackendBaseResponse is the struct of iam backend response
@@ -83,6 +89,28 @@ type IAMBackendClient interface {
 	PolicySubjects(policyIDs []int64) (data []map[string]interface{}, err error)
 
 	GetApplyURL(body interface{}) (string, error)
+
+	// Model
+	ModelQuery(system string) (map[string]interface{}, error)
+	AddSystem(body interface{}) error
+	UpdateSystem(system string, body interface{}) error
+	AddResourceType(system string, body interface{}) error
+	UpdateResourceType(system, resourceTypeID string, body interface{}) error
+	BatchDeleteResourceType(system string, resourceTypeIDs ...string) error
+	AddInstanceSelection(system string, body interface{}) error
+	UpdateInstanceSelection(system, instanceSelectionID string, body interface{}) error
+	BatchDeleteInstanceSelection(system string, instanceSelectionIDs ...string) error
+	AddAction(system string, body interface{}) error
+	UpdateAction(system, actionID string, body interface{}) error
+	BatchDeleteAction(system string, actionIDs ...string) error
+	AddActionGroups(system string, body interface{}) error
+	UpdateActionGroups(system string, body interface{}) error
+	AddResourceCreatorActions(system string, body interface{}) error
+	UpdateResourceCreatorActions(system string, body interface{}) error
+	AddCommonActions(system string, body interface{}) error
+	UpdateCommonActions(system string, body interface{}) error
+	AddFeatureShieldRules(system string, body interface{}) error
+	UpdateFeatureShieldRules(system string, body interface{}) error
 }
 
 type iamBackendClient struct {
@@ -158,6 +186,10 @@ func (c *iamBackendClient) call(
 		request = request.Post(url).Send(data)
 	case GET:
 		request = request.Get(url).Query(data)
+	case PUT:
+		request = request.Put(url).Send(data)
+	case DELETE:
+		request = request.Delete(url).Send(data)
 	}
 
 	if c.isApiDebugEnabled {
@@ -364,4 +396,278 @@ func (c *iamBackendClient) GetApplyURL(body interface{}) (url string, err error)
 		return "", errors.New("url is not a valid string")
 	}
 	return url, nil
+}
+
+// ModelQuery performs a model query using the specified system.
+//
+// system: the name of the system.
+// Returns a map[string]interface{} and an error.
+func (c *iamBackendClient) ModelQuery(system string) (map[string]interface{}, error) {
+	if system == "" {
+		system = c.System
+	}
+	path := fmt.Sprintf("/api/v1/model/systems/%s/query", system)
+	return c.callWithReturnMapData(GET, path, map[string]interface{}{}, 10)
+}
+
+// AddSystem is a function that adds a system to the IAM backend.
+//
+// It takes a parameter called body which represents the system to be added.
+// It returns an error if the operation fails.
+func (c *iamBackendClient) AddSystem(body interface{}) error {
+	path := "/api/v1/model/systems"
+	_, err := c.callWithReturnMapData(POST, path, body, 10)
+	return err
+}
+
+// UpdateSystem updates the specified system in the IAM backend.
+//
+// system: The name of the system to be updated.
+// body: The updated data for the system.
+// error: An error if the update operation fails.
+func (c *iamBackendClient) UpdateSystem(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s", system)
+	_, err := c.callWithReturnMapData(PUT, path, body, 10)
+	return err
+}
+
+// AddResourceType description of the Go function.
+//
+// Adds a resource type to the specified system.
+//
+// Parameters:
+// - system: The system to add the resource type to.
+// - body: The body of the resource type to add.
+//
+// Returns:
+// - error: An error if the operation fails.
+func (c *iamBackendClient) AddResourceType(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/resource-types", system)
+	_, err := c.callWithReturnMapData(POST, path, body, 10)
+	return err
+}
+
+// UpdateResourceType updates a resource type in the IAM backend.
+//
+// Parameters:
+//   - system: the system ID
+//   - resourceTypeID: the ID of the resource type
+//   - body: the body of the request
+//
+// Returns:
+//   - error: an error if the update fails
+func (c *iamBackendClient) UpdateResourceType(system, resourceTypeID string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/resource-types/%s", system, resourceTypeID)
+	_, err := c.callWithReturnMapData(PUT, path, body, 10)
+	return err
+}
+
+// BatchDeleteResourceType deletes multiple resource types in the IAM backend.
+//
+// system: The system from which the resource types will be deleted.
+// resourceTypeIDs: The IDs of the resource types to be deleted.
+// error: Returns an error if the deletion fails.
+func (c *iamBackendClient) BatchDeleteResourceType(system string, resourceTypeIDs ...string) error {
+	if len(resourceTypeIDs) == 0 {
+		return nil
+	}
+	path := fmt.Sprintf("/api/v1/model/systems/%s/resource-types", system)
+	body := []map[string]string{}
+	for _, v := range resourceTypeIDs {
+		body = append(body, map[string]string{
+			"id": v,
+		})
+	}
+	_, err := c.callWithReturnMapData(DELETE, path, body, 10)
+	return err
+}
+
+// AddInstanceSelection description of the Go function.
+//
+// Adds an instance selection for a given system.
+//
+// Parameters:
+// - system: The name of the system.
+// - body: The instance selection data.
+//
+// Returns:
+// - error: An error if the operation fails.
+func (c *iamBackendClient) AddInstanceSelection(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/instance-selections", system)
+	_, err := c.callWithReturnMapData(POST, path, body, 10)
+	return err
+}
+
+// UpdateInstanceSelection updates an instance selection for a system.
+//
+// system: the name of the system.
+// instanceSelectionID: the ID of the instance selection.
+// body: the data to update the instance selection with.
+// Returns an error if the update fails.
+func (c *iamBackendClient) UpdateInstanceSelection(system, instanceSelectionID string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/instance-selections/%s", system, instanceSelectionID)
+	_, err := c.callWithReturnMapData(PUT, path, body, 10)
+	return err
+}
+
+// BatchDeleteInstanceSelection deletes multiple instance selections for a given system.
+//
+// Parameters:
+// - system: the name of the system
+// - instanceSelectionIDs: the IDs of the instance selections to delete
+//
+// Return type:
+// - error: returns an error if the deletion fails
+func (c *iamBackendClient) BatchDeleteInstanceSelection(system string, instanceSelectionIDs ...string) error {
+	if len(instanceSelectionIDs) == 0 {
+		return nil
+	}
+	path := fmt.Sprintf("/api/v1/model/systems/%s/instance-selections", system)
+	body := []map[string]string{}
+	for _, v := range instanceSelectionIDs {
+		body = append(body, map[string]string{
+			"id": v,
+		})
+	}
+	_, err := c.callWithReturnMapData(DELETE, path, body, 10)
+	return err
+}
+
+// AddAction adds an action to the specified system.
+//
+// system: the name of the system.
+// body: the data to be sent in the request body.
+// error: an error, if any, encountered during the process.
+func (c *iamBackendClient) AddAction(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/actions", system)
+	_, err := c.callWithReturnMapData(POST, path, body, 10)
+	return err
+}
+
+// UpdateAction updates an action in the IAM backend.
+//
+// system: the system name.
+// actionID: the ID of the action.
+// body: the updated action data.
+// Returns an error if the update fails.
+func (c *iamBackendClient) UpdateAction(system, actionID string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/actions/%s", system, actionID)
+	_, err := c.callWithReturnMapData(PUT, path, body, 10)
+	return err
+}
+
+// BatchDeleteAction deletes a batch of actions for a given system.
+//
+// It takes in the system string and a variadic parameter actionIDs of type string.
+// It returns an error.
+func (c *iamBackendClient) BatchDeleteAction(system string, actionIDs ...string) error {
+	if len(actionIDs) == 0 {
+		return nil
+	}
+	path := fmt.Sprintf("/api/v1/model/systems/%s/actions", system)
+	body := []map[string]string{}
+	for _, v := range actionIDs {
+		body = append(body, map[string]string{
+			"id": v,
+		})
+	}
+	_, err := c.callWithReturnMapData(DELETE, path, body, 10)
+	return err
+}
+
+// AddActionGroups is a function that adds action groups to a system.
+//
+// It takes two parameters:
+// - system: a string representing the system to which the action groups will be added.
+// - body: an interface{} containing the data for the action groups.
+//
+// It returns an error.
+func (c *iamBackendClient) AddActionGroups(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/configs/action_groups", system)
+	_, err := c.callWithReturnMapData(POST, path, body, 10)
+	return err
+}
+
+// UpdateActionGroups updates the action groups for a given system.
+//
+// It takes the following parameter(s):
+// - system: a string representing the system to update the action groups for.
+// - body: an interface{} representing the data to be sent in the request body.
+//
+// It returns an error indicating any issues encountered during the update process.
+func (c *iamBackendClient) UpdateActionGroups(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/configs/action_groups", system)
+	_, err := c.callWithReturnMapData(PUT, path, body, 10)
+	return err
+}
+
+// AddResourceCreatorActions is a function that adds resource creator actions to the system.
+//
+// It takes in the following parameter:
+// - system: a string that represents the system.
+// - body: an interface{} that represents the body of the request.
+//
+// It returns an error.
+func (c *iamBackendClient) AddResourceCreatorActions(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/configs/resource_creator_actions", system)
+	_, err := c.callWithReturnMapData(POST, path, body, 10)
+	return err
+}
+
+// UpdateResourceCreatorActions updates the resource creator actions for a given system.
+//
+// system: the name of the system for which to update the resource creator actions.
+// body: the data representing the updated resource creator actions.
+// Return type: error.
+func (c *iamBackendClient) UpdateResourceCreatorActions(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/configs/resource_creator_actions", system)
+	_, err := c.callWithReturnMapData(PUT, path, body, 10)
+	return err
+}
+
+// AddCommonActions adds common actions to the IAM backend client.
+//
+// system: The system to add common actions to.
+// body: The data to be sent in the request body.
+// error: An error that occurred during the function execution, if any.
+func (c *iamBackendClient) AddCommonActions(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/configs/common_actions", system)
+	_, err := c.callWithReturnMapData(POST, path, body, 10)
+	return err
+}
+
+// UpdateCommonActions updates the common actions for a given system.
+//
+// system: the name of the system to update.
+// body: the new common actions configuration.
+// error: an error if the update fails.
+func (c *iamBackendClient) UpdateCommonActions(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/configs/common_actions", system)
+	_, err := c.callWithReturnMapData(PUT, path, body, 10)
+	return err
+}
+
+// AddFeatureShieldRules adds feature shield rules for a system.
+//
+// system: the system to add feature shield rules for.
+// body: the data containing the feature shield rules.
+// Returns an error if there was a problem adding the rules.
+func (c *iamBackendClient) AddFeatureShieldRules(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/configs/feature_shield_rules", system)
+	_, err := c.callWithReturnMapData(POST, path, body, 10)
+	return err
+}
+
+// UpdateFeatureShieldRules updates the feature shield rules for a given system.
+//
+// Parameters:
+//   - system: the name of the system to update the feature shield rules for.
+//   - body: the data containing the updated feature shield rules.
+//
+// Return type:
+//   - error: an error if the update fails.
+func (c *iamBackendClient) UpdateFeatureShieldRules(system string, body interface{}) error {
+	path := fmt.Sprintf("/api/v1/model/systems/%s/configs/feature_shield_rules", system)
+	_, err := c.callWithReturnMapData(PUT, path, body, 10)
+	return err
 }

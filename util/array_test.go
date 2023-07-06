@@ -30,4 +30,24 @@ var _ = Describe("Utils", func() {
 		)
 	})
 
+	Describe("Contains", func() {
+		DescribeTable("test string", func(expected bool, array []string, value string) {
+			assert.Equal(GinkgoT(), expected, Contains(array, value))
+		},
+			Entry("empty", false, []string{}, ""),
+			Entry("one string", true, []string{"1"}, "1"),
+			Entry("three strings", true, []string{"1", "2", "3"}, "1"),
+			Entry("not found", false, []string{"1", "2", "3"}, "4"),
+		)
+
+		DescribeTable("test int", func(expected bool, array []int, value int) {
+			assert.Equal(GinkgoT(), expected, Contains(array, value))
+		},
+			Entry("empty", false, []int{}, 0),
+			Entry("one int64", true, []int{1}, 1),
+			Entry("three int64", true, []int{1, 2, 3}, 1),
+			Entry("not found", false, []int{1, 2, 3}, 4),
+		)
+	})
+
 })

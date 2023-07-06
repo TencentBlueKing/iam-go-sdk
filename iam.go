@@ -12,6 +12,7 @@
 package iam
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -24,7 +25,12 @@ import (
 	"github.com/TencentBlueKing/iam-go-sdk/cache"
 	"github.com/TencentBlueKing/iam-go-sdk/client"
 	"github.com/TencentBlueKing/iam-go-sdk/expression"
+	"github.com/TencentBlueKing/iam-go-sdk/iammigrate"
 	"github.com/TencentBlueKing/iam-go-sdk/logger"
+	"github.com/golang-migrate/migrate/v4"
+
+	// register file source
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 // IAM is the instance of iam sdk
@@ -329,6 +335,53 @@ func (i *IAM) GenPermissionApplyData(a ApplicationActionListForApply) (data H, e
 		return
 	}
 	return
+}
+
+// Migrate migrates the iam model using the provided migrations directory.
+//
+// It takes the following parameters:
+//   - db: a pointer to a sql.DB instance representing the database connection.
+//   - migrateTable: the name of the table where migration information is stored.
+//   - migrationsDir: the directory containing the migration files.
+//     `file:///absolute/path`
+//     `file://relative/path`
+//   - timeout: the duration after which a migration statement times out.
+//
+// It returns an error if any error occurs during the migration process.
+func (i *IAM) Migrate(db *sql.DB, migrateTable, migrationsDir string, timeout time.Duration,
+	templateVar interface{}) error {
+	databaseInstance, err := iammigrate.WithInstance(db, &iammigrate.Config{
+		MigrationsTable:  migrateTable,
+		StatementTimeout: timeout,
+		TemplateVar:      templateVar,
+	}, i.client)
+	if err != nil {
+		return err
+	}
+
+	mig, err := migrate.NewWithDatabaseInstance(migrationsDir, "bkiam_migrations", databaseInstance)
+	if err != nil {
+		return err
+	}
+
+	// remove dirty
+	version, dirty, err := mig.Version()
+	if err != nil && err != migrate.ErrNilVersion {
+		return err
+	}
+
+	if dirty {
+		// rollback to previous version
+		if version >= 0 {
+			version--
+		}
+		if err = mig.Force(int(version)); err != nil {
+			return err
+		}
+	}
+
+	// run migrations
+	return mig.Up()
 }
 
 // TODO:
