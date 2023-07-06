@@ -19,6 +19,8 @@ iam-go-sdk is the SDK of blueking IAM(BK-IAM), your system can use BK-IAM easily
 - Get Token of the system: GetToken
 - Support prometheus metrics
 - A simple framework for callback:dispatcher/provider interface
+- Support registry model
+- Support model migration
 
 ## Getting started
 

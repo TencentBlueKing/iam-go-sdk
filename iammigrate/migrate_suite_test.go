@@ -9,32 +9,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package util
+package iammigrate
 
 import (
-	"strconv"
-	"strings"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-// Int64ArrayToString will covert inter array to string with separator `,`
-func Int64ArrayToString(input []int64, sep string) string {
-	b := make([]string, len(input))
-	for i, v := range input {
-		b[i] = strconv.FormatInt(v, 10)
-	}
-
-	return strings.Join(b, ",")
-}
-
-// Contains checks if an element exists in a given slice.
-//
-// The function takes a slice of elements and a target value. It returns a boolean
-// value indicating whether the target value is present in the slice or not.
-func Contains[T comparable](elems []T, v T) bool {
-	for _, s := range elems {
-		if v == s {
-			return true
-		}
-	}
-	return false
+func TestUtil(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Migrate Suite")
 }

@@ -21,6 +21,8 @@ iam-go-sdk 是蓝鲸权限中心(BK-IAM)提供的用于快速接入权限体系�
 - 获取系统Token: GetToken
 - 支持prometheus统计接口调用信息
 - 支持反向拉取框架 dispatcher/provider interface
+- 支持注册权限模型: model 相关接口
+- 支持使用 migrate 注册权限模型: Migrate
 
 ## Getting started
 
