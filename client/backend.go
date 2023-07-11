@@ -210,12 +210,16 @@ func (c *iamBackendClient) call(
 		EndStruct(&baseResult, callbackFunc)
 
 	duration := time.Since(start)
+	body := ""
+	if respBody != nil {
+		body = conv.BytesToString(respBody)
+	}
 
 	logFailHTTPRequest(request, resp, respBody, errs, &baseResult)
 
 	logger.Debugf("http request result: %+v", baseResult.String())
 	logger.Debugf("http request took %v ms", float64(duration/time.Millisecond))
-	logger.Debugf("http response: status_code=%s, body=%+v", resp.StatusCode, conv.BytesToString(respBody))
+	logger.Debugf("http response: status_code=%s, body=%+v", resp.StatusCode, body)
 
 	if len(errs) != 0 {
 		return fmt.Errorf("gorequest errors=`%s`", errs)
