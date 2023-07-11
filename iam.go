@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/TencentBlueKing/gopkg/stringx"
+	"github.com/golang-migrate/migrate/v4/source"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 
@@ -342,13 +343,11 @@ func (i *IAM) GenPermissionApplyData(a ApplicationActionListForApply) (data H, e
 // It takes the following parameters:
 //   - db: a pointer to a sql.DB instance representing the database connection.
 //   - migrateTable: the name of the table where migration information is stored.
-//   - migrationsDir: the directory containing the migration files.
-//     `file:///absolute/path`
-//     `file://relative/path`
+//   - sourceDriver: the migrations source driver.
 //   - timeout: the duration after which a migration statement times out.
 //
 // It returns an error if any error occurs during the migration process.
-func (i *IAM) Migrate(db *sql.DB, migrateTable, migrationsDir string, timeout time.Duration,
+func (i *IAM) Migrate(db *sql.DB, sourceDriver source.Driver, migrateTable string, timeout time.Duration,
 	templateVar interface{}) error {
 	databaseInstance, err := iammigrate.WithInstance(db, &iammigrate.Config{
 		MigrationsTable:  migrateTable,
@@ -359,7 +358,7 @@ func (i *IAM) Migrate(db *sql.DB, migrateTable, migrationsDir string, timeout ti
 		return err
 	}
 
-	mig, err := migrate.NewWithDatabaseInstance(migrationsDir, "bkiam_migrations", databaseInstance)
+	mig, err := migrate.NewWithInstance("migrations_source", sourceDriver, "bkiam_migrations", databaseInstance)
 	if err != nil {
 		return err
 	}
