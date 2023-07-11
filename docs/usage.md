@@ -261,12 +261,15 @@ fmt.Println("GetToken:", token, err)
 ### 3.5 使用 migrate 注册权限模型
 
 ```go
+//go:embed migrations/*.json
+var fs embed.FS
+
 db := &sql.DB{} // 初始化 migrate 数据库
 migrationsTable := "bk_iam_migrations" // migrate 表名
-migrationsDir := "./migrations" // migrations 文件目录
 timeout := 5*time.Minute // 超时时间
 tempVar := map[string]interface{}{"SYSTEM_ID": "demo"} // 模板参数
-err := i.Migrate(db, migrationsTable, migrationsDir, timeout, tempVar)
+driver, _ := iofs.New(fs, "migrations") // 初始化 migrations 来源 driver
+err := i.Migrate(db, driver, migrationsTable, timeout, tempVar)
 ```
 
 权限模型 migrations 文件参考: [migrations](../iammigrate/testdata/0000_init.up.json)
