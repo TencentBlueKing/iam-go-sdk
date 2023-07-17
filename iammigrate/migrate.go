@@ -66,7 +66,7 @@ func DoMigate(ctx context.Context, cli client.IAMBackendClient, data []byte, tem
 		var opData []byte
 		var err error
 		switch d := v.Data.(type) {
-		case map[string]interface{}, []map[string]interface{}:
+		case map[string]interface{}, []map[string]interface{}, []interface{}:
 			opData, err = json.Marshal(d)
 			if err != nil {
 				return err
