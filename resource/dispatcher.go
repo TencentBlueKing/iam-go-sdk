@@ -15,6 +15,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"golang.org/x/net/context"
 )
 
 // Page the object for pagination
@@ -25,10 +27,11 @@ type Page struct {
 
 // Request the callback request body
 type Request struct {
-	Type   string                 `json:"type" binding:"required"`
-	Method string                 `json:"method" binding:"required"`
-	Filter map[string]interface{} `json:"filter" binding:"omitempty"`
-	Page   Page                   `json:"page" binding:"omitempty"`
+	Context context.Context        `json:"-"`
+	Type    string                 `json:"type" binding:"required"`
+	Method  string                 `json:"method" binding:"required"`
+	Filter  map[string]interface{} `json:"filter" binding:"omitempty"`
+	Page    Page                   `json:"page" binding:"omitempty"`
 }
 
 // Response the response body
@@ -97,6 +100,9 @@ func doDispatch(r *http.Request, d Dispatcher) Response {
 			Message: fmt.Sprintf("type=%s not supported or the provider not registered", req.Type),
 		}
 	}
+
+	// set context
+	req.Context = r.Context()
 
 	// dispatch the method
 	switch req.Method {
