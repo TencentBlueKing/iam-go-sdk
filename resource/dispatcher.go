@@ -12,11 +12,10 @@
 package resource
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"golang.org/x/net/context"
 )
 
 // Page the object for pagination
