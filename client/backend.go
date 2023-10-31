@@ -209,21 +209,21 @@ func (c *iamBackendClient) call(
 	resp, respBody, errs := request.
 		EndStruct(&baseResult, callbackFunc)
 
-	duration := time.Since(start)
+	if len(errs) != 0 {
+		logFailHTTPRequest(request, resp, respBody, errs, &baseResult)
+		return fmt.Errorf("gorequest errors=`%s`", errs)
+	}
+
 	body := ""
+	duration := time.Since(start)
 	if respBody != nil {
 		body = conv.BytesToString(respBody)
 	}
-
-	logFailHTTPRequest(request, resp, respBody, errs, &baseResult)
 
 	logger.Debugf("http request result: %+v", baseResult.String())
 	logger.Debugf("http request took %v ms", float64(duration/time.Millisecond))
 	logger.Debugf("http response: status_code=%s, body=%+v", resp.StatusCode, body)
 
-	if len(errs) != 0 {
-		return fmt.Errorf("gorequest errors=`%s`", errs)
-	}
 	if resp.StatusCode != http.StatusOK {
 		err := fmt.Errorf("gorequest statusCode is %d not 200", resp.StatusCode)
 		if baseResult.Message != "" {
