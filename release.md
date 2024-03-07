@@ -1,6 +1,10 @@
 版本日志
 ===============
 
+## IAM v0.1.5
+
+- [NEW] 支持资源反向拉取 fetch_instance_list 与 fetch_resource_type_schema 方法
+
 ## IAM v0.1.0
 
 - [NEW] 支持权限中心后台v2鉴权api

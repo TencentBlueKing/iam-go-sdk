@@ -1,3 +1,6 @@
+//go:build !codeanalysis
+// +build !codeanalysis
+
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云-权限中心Go SDK(iam-go-sdk) available.
@@ -8,8 +11,6 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-// +build !codeanalysis
-
 package main
 
 import (
@@ -67,6 +68,30 @@ func (d DummyProvider) SearchInstance(req resource.Request) resource.Response {
 	return resource.Response{
 		Code:    0,
 		Message: req.Method,
+	}
+}
+
+// FetchInstanceList implements the fetch_instance_list
+func (d DummyProvider) FetchInstanceList(req resource.Request) resource.Response {
+	return resource.Response{
+		Code:    0,
+		Message: req.Method,
+		Data: map[string]any{
+			"count":   0,
+			"results": [][]map[string]any{},
+		},
+	}
+}
+
+// FetchResourceTypeSchema implements the fetch_resource_type_schema
+func (d DummyProvider) FetchResourceTypeSchema(req resource.Request) resource.Response {
+	return resource.Response{
+		Code:    0,
+		Message: req.Method,
+		Data: map[string]any{
+			"type":       "object",
+			"properties": map[string]map[string]any{},
+		},
 	}
 }
 

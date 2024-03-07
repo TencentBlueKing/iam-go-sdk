@@ -117,6 +117,10 @@ func doDispatch(r *http.Request, d Dispatcher) Response {
 		return provider.ListInstanceByPolicy(req)
 	case "search_instance":
 		return provider.SearchInstance(req)
+	case "fetch_instance_list":
+		return provider.FetchInstanceList(req)
+	case "fetch_resource_type_schema":
+		return provider.FetchResourceTypeSchema(req)
 	default:
 		return Response{
 			Code:    404,
