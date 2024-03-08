@@ -19,4 +19,6 @@ type Provider interface {
 	FetchInstanceInfo(req Request) Response
 	ListInstanceByPolicy(req Request) Response
 	SearchInstance(req Request) Response
+	FetchInstanceList(req Request) Response
+	FetchResourceTypeSchema(req Request) Response
 }
