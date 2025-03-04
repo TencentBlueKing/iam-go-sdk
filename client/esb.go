@@ -32,15 +32,17 @@ type esbClient struct {
 
 	appCode   string
 	appSecret string
+	tenantId  string
 }
 
 // NewESBClient will create a esb client
-func NewESBClient(host string, appCode string, appSecret string) ESBClient {
+func NewESBClient(host string, appCode string, appSecret string, tenantId string) ESBClient {
 	return &esbClient{
 		Host: host,
 
 		appCode:   appCode,
 		appSecret: appSecret,
+		tenantId:  tenantId,
 	}
 }
 
@@ -74,7 +76,9 @@ func (c *esbClient) call(
 		callTimeout = defaultTimeout
 	}
 
-	headers := map[string]string{}
+	headers := map[string]string{
+		"X-Bk-Tenant-Id": c.tenantId,
+	}
 
 	url := fmt.Sprintf("%s%s", c.Host, path)
 	result := ESBResponse{}

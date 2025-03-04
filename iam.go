@@ -48,8 +48,9 @@ type IAM struct {
 // NewIAM will create an IAM instance
 // if your TencentBlueking has a APIGateway, use NewAPIGatewayIAM
 func NewIAM(system string, appCode, appSecret, bkIAMHost, bkPaaSHost string) *IAM {
-	iamBackendClient := client.NewIAMBackendClient(bkIAMHost, false, system, appCode, appSecret)
-	esbClient := client.NewESBClient(bkPaaSHost, appCode, appSecret)
+	tenantId := "default"
+	iamBackendClient := client.NewIAMBackendClient(bkIAMHost, false, system, appCode, appSecret, tenantId)
+	esbClient := client.NewESBClient(bkPaaSHost, appCode, appSecret, tenantId)
 
 	return &IAM{
 		appCode:   appCode,
@@ -62,8 +63,8 @@ func NewIAM(system string, appCode, appSecret, bkIAMHost, bkPaaSHost string) *IA
 
 // NewAPIGatewayIAM will create an IAM instance, call all api through APIGateway
 // if your TencentBlueking has a APIGateway, use this, recommend
-func NewAPIGatewayIAM(system string, appCode, appSecret, bkAPIGatewayURL string) *IAM {
-	apigatewayClient := client.NewIAMBackendClient(bkAPIGatewayURL, true, system, appCode, appSecret)
+func NewAPIGatewayIAM(system string, appCode, appSecret, bkAPIGatewayURL, tenantId string) *IAM {
+	apigatewayClient := client.NewIAMBackendClient(bkAPIGatewayURL, true, system, appCode, appSecret, tenantId)
 
 	return &IAM{
 		appCode:   appCode,

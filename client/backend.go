@@ -123,10 +123,12 @@ type iamBackendClient struct {
 
 	isApiDebugEnabled bool
 	isApiForceEnabled bool
+
+	tenantId string
 }
 
 // NewIAMBackendClient will create a iam backend client
-func NewIAMBackendClient(host string, isAPIGateway bool, system string, appCode string, appSecret string) IAMBackendClient {
+func NewIAMBackendClient(host string, isAPIGateway bool, system string, appCode string, appSecret string, tenantId string) IAMBackendClient {
 	host = strings.TrimRight(host, "/")
 	return &iamBackendClient{
 		Host:         host,
@@ -135,6 +137,7 @@ func NewIAMBackendClient(host string, isAPIGateway bool, system string, appCode 
 		System:    system,
 		appCode:   appCode,
 		appSecret: appSecret,
+		tenantId:  tenantId,
 
 		// will add ?debug=true in url, for debug api/policy, show the details
 		isApiDebugEnabled: os.Getenv("IAM_API_DEBUG") == "true" || os.Getenv("BKAPP_IAM_API_DEBUG") == "true",
@@ -156,6 +159,7 @@ func (c *iamBackendClient) call(
 
 	headers := map[string]string{
 		"X-Bk-IAM-Version": bkIAMVersion,
+		"X-Bk-Tenant-Id":   c.tenantId,
 	}
 
 	if c.IsAPIGateway {

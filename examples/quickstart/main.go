@@ -1,3 +1,6 @@
+//go:build !codeanalysis
+// +build !codeanalysis
+
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云-权限中心Go SDK(iam-go-sdk) available.
@@ -8,8 +11,6 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-// +build !codeanalysis
-
 package main
 
 import (
@@ -99,5 +100,10 @@ func main() {
 
 	token, err := i.GetToken()
 	fmt.Println("GetToken:", token, err)
+
+	// 使用apiGateway方式
+	apiGateway := iam.NewAPIGatewayIAM("bk_iam", "bk_iam", "{appSecret}", "{bkAPIGatewayURL}", "{tenantId}")
+	allowed, err = apiGateway.IsAllowed(req)
+	fmt.Println("isAllowed:", allowed, err)
 
 }
