@@ -40,9 +40,6 @@ type IAM struct {
 	appSecret string
 
 	client client.IAMBackendClient
-
-	// TODO: remove this after all changed to APIGateway
-	esbClient client.ESBClient
 }
 
 // NewIAM will create an IAM instance
@@ -50,14 +47,12 @@ type IAM struct {
 func NewIAM(system string, appCode, appSecret, bkIAMHost, bkPaaSHost string) *IAM {
 	tenantId := "default"
 	iamBackendClient := client.NewIAMBackendClient(bkIAMHost, false, system, appCode, appSecret, tenantId)
-	esbClient := client.NewESBClient(bkPaaSHost, appCode, appSecret, tenantId)
 
 	return &IAM{
 		appCode:   appCode,
 		appSecret: appSecret,
 
-		client:    iamBackendClient,
-		esbClient: esbClient,
+		client: iamBackendClient,
 	}
 }
 
@@ -70,8 +65,7 @@ func NewAPIGatewayIAM(system string, appCode, appSecret, bkAPIGatewayURL, tenant
 		appCode:   appCode,
 		appSecret: appSecret,
 
-		client:    apigatewayClient,
-		esbClient: nil,
+		client: apigatewayClient,
 	}
 }
 
@@ -315,12 +309,8 @@ func (i *IAM) GetApplyURL(application Application, bkToken string, bkUsername st
 		return
 	}
 
-	if i.esbClient != nil {
-		url, err = i.esbClient.GetApplyURL(bkToken, bkUsername, application)
-	} else {
-		// if use apigateway
-		url, err = i.client.GetApplyURL(application)
-	}
+	// use apigateway
+	url, err = i.client.GetApplyURL(application)
 
 	return
 }
