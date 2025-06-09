@@ -9,21 +9,18 @@ init:
 
 dep:
 	go mod tidy
-	go mod vendor
 
 mock:
 	go generate ./...
 
 lint:
-	export GOFLAGS=-mod=vendor
 	golangci-lint run
 
 lint-dupl:
-	export GOFLAGS=-mod=vendor
 	golangci-lint run --no-config --disable-all --enable=dupl
 
 test:
-	go test -mod=vendor -gcflags=all=-l $(shell go list ./... | grep -v mock | grep -v docs) -covermode=count -coverprofile .coverage.cov
+	go test -gcflags=all=-l $(shell go list ./... | grep -v mock | grep -v docs) -covermode=count -coverprofile .coverage.cov
 
 bench:
 	go test -run=nonthingplease -benchmem -bench=. $(shell go list ./... | grep -v /vendor/)

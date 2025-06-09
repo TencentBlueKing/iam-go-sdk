@@ -1,6 +1,6 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
- * 蓝鲸智云-权限中心Go SDK(iam-go-sdk) available.
+ * 蓝鲸智云 - 权限中心 Go SDK(iam-go-sdk) available.
  * Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at http://opensource.org/licenses/MIT
@@ -114,8 +114,7 @@ type IAMBackendClient interface {
 }
 
 type iamBackendClient struct {
-	Host         string
-	IsAPIGateway bool
+	Host string
 
 	System    string
 	appCode   string
@@ -123,14 +122,23 @@ type iamBackendClient struct {
 
 	isApiDebugEnabled bool
 	isApiForceEnabled bool
+
+	bkTenantID string
+}
+
+type Option func(*iamBackendClient)
+
+func WithBkTenantID(tenantID string) Option {
+	return func(c *iamBackendClient) {
+		c.bkTenantID = tenantID
+	}
 }
 
 // NewIAMBackendClient will create a iam backend client
-func NewIAMBackendClient(host string, isAPIGateway bool, system string, appCode string, appSecret string) IAMBackendClient {
+func NewIAMBackendClient(host string, system string, appCode string, appSecret string, opts ...Option) IAMBackendClient {
 	host = strings.TrimRight(host, "/")
-	return &iamBackendClient{
-		Host:         host,
-		IsAPIGateway: isAPIGateway,
+	c := &iamBackendClient{
+		Host: host,
 
 		System:    system,
 		appCode:   appCode,
@@ -141,6 +149,12 @@ func NewIAMBackendClient(host string, isAPIGateway bool, system string, appCode 
 		// will add ?force=true in url, for api/policy run without cache(all data from database)
 		isApiForceEnabled: os.Getenv("IAM_API_FORCE") == "true" || os.Getenv("BKAPP_IAM_API_FORCE") == "true",
 	}
+
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	return c
 }
 
 func (c *iamBackendClient) call(
@@ -158,19 +172,20 @@ func (c *iamBackendClient) call(
 		"X-Bk-IAM-Version": bkIAMVersion,
 	}
 
-	if c.IsAPIGateway {
-		auth, err := json.Marshal(map[string]string{
-			"bk_app_code":   c.appCode,
-			"bk_app_secret": c.appSecret,
-		})
-		if err != nil {
-			return fmt.Errorf("generate apigateway call header fail. err=`%s`", err)
-		}
+	// APIGateway Authentication
+	auth, err := json.Marshal(map[string]string{
+		"bk_app_code":   c.appCode,
+		"bk_app_secret": c.appSecret,
+	})
+	if err != nil {
+		return fmt.Errorf("generate apigateway call header fail. err=`%s`", err)
+	}
 
-		headers["X-Bkapi-Authorization"] = conv.BytesToString(auth)
-	} else {
-		headers["X-BK-APP-CODE"] = c.appCode
-		headers["X-BK-APP-SECRET"] = c.appSecret
+	headers["X-Bkapi-Authorization"] = conv.BytesToString(auth)
+
+	// BK Tenant ID
+	if c.bkTenantID != "" {
+		headers["X-Bk-Tenant-Id"] = c.bkTenantID
 	}
 
 	url := fmt.Sprintf("%s%s", c.Host, path)
@@ -237,7 +252,7 @@ func (c *iamBackendClient) call(
 		return fmt.Errorf("response body.code: %d, message:%s", baseResult.Code, baseResult.Message)
 	}
 
-	err := json.Unmarshal(baseResult.Data, responseData)
+	err = json.Unmarshal(baseResult.Data, responseData)
 	if err != nil {
 		return fmt.Errorf("http request response body data not valid: %w, data=`%v`", err, baseResult.Data)
 	}

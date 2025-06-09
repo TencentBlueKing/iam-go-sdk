@@ -1,6 +1,6 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
- * 蓝鲸智云-权限中心Go SDK(iam-go-sdk) available.
+ * 蓝鲸智云 - 权限中心 Go SDK(iam-go-sdk) available.
  * Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at http://opensource.org/licenses/MIT
@@ -26,11 +26,13 @@ type Page struct {
 
 // Request the callback request body
 type Request struct {
-	Context context.Context        `json:"-"`
-	Type    string                 `json:"type" binding:"required"`
-	Method  string                 `json:"method" binding:"required"`
-	Filter  map[string]interface{} `json:"filter" binding:"omitempty"`
-	Page    Page                   `json:"page" binding:"omitempty"`
+	Context context.Context `json:"-"`
+	Header  http.Header     `json:"-"`
+
+	Type   string                 `json:"type" binding:"required"`
+	Method string                 `json:"method" binding:"required"`
+	Filter map[string]interface{} `json:"filter" binding:"omitempty"`
+	Page   Page                   `json:"page" binding:"omitempty"`
 }
 
 // Response the response body
@@ -102,6 +104,8 @@ func doDispatch(r *http.Request, d Dispatcher) Response {
 
 	// set context
 	req.Context = r.Context()
+	// set header
+	req.Header = r.Header
 
 	// dispatch the method
 	switch req.Method {

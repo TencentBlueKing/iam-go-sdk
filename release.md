@@ -1,6 +1,10 @@
 版本日志
 ===============
 
+## IAM v1.0.0
+- [Breaking Change] 移除对 ESB 的支持，仅支持通过 APIGateway 请求 IAM 接口
+- [NEW] 支持多租户
+
 ## IAM v0.1.5
 
 - [NEW] 支持资源反向拉取 fetch_instance_list 与 fetch_resource_type_schema 方法
@@ -13,7 +17,7 @@
 ## IAM v0.0.9
 
 - [NEW] 支持StringContains 操作符 #25
-- [OTHERS] 规范化所有操作符左值/右值, 并增加校验(校验失败直接False)
+- [OTHERS] 规范化所有操作符左值/右值, 并增加校验(校验失败直接 False)
 
 ## IAM v0.0.8
 

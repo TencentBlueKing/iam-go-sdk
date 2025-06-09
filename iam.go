@@ -1,6 +1,6 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
- * 蓝鲸智云-权限中心Go SDK(iam-go-sdk) available.
+ * 蓝鲸智云 - 权限中心 Go SDK(iam-go-sdk) available.
  * Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at http://opensource.org/licenses/MIT
@@ -40,38 +40,40 @@ type IAM struct {
 	appSecret string
 
 	client client.IAMBackendClient
+}
 
-	// TODO: remove this after all changed to APIGateway
-	esbClient client.ESBClient
+type Option func(*IAM)
+
+func WithBkTenantID(bkTenantID string) Option {
+	return func(i *IAM) {
+		if i.client != nil {
+			client.WithBkTenantID(bkTenantID)
+		}
+	}
 }
 
 // NewIAM will create an IAM instance
-// if your TencentBlueking has a APIGateway, use NewAPIGatewayIAM
-func NewIAM(system string, appCode, appSecret, bkIAMHost, bkPaaSHost string) *IAM {
-	iamBackendClient := client.NewIAMBackendClient(bkIAMHost, false, system, appCode, appSecret)
-	esbClient := client.NewESBClient(bkPaaSHost, appCode, appSecret)
-
-	return &IAM{
-		appCode:   appCode,
-		appSecret: appSecret,
-
-		client:    iamBackendClient,
-		esbClient: esbClient,
-	}
+func NewIAM(system, appCode, appSecret, bkAPIGatewayURL string, opts ...Option) *IAM {
+	return NewAPIGatewayIAM(system, appCode, appSecret, bkAPIGatewayURL, opts...)
 }
 
 // NewAPIGatewayIAM will create an IAM instance, call all api through APIGateway
 // if your TencentBlueking has a APIGateway, use this, recommend
-func NewAPIGatewayIAM(system string, appCode, appSecret, bkAPIGatewayURL string) *IAM {
-	apigatewayClient := client.NewIAMBackendClient(bkAPIGatewayURL, true, system, appCode, appSecret)
+func NewAPIGatewayIAM(system, appCode, appSecret, bkAPIGatewayURL string, opts ...Option) *IAM {
+	apigatewayClient := client.NewIAMBackendClient(bkAPIGatewayURL, system, appCode, appSecret)
 
-	return &IAM{
+	c := &IAM{
 		appCode:   appCode,
 		appSecret: appSecret,
 
-		client:    apigatewayClient,
-		esbClient: nil,
+		client: apigatewayClient,
 	}
+
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	return c
 }
 
 // IsAllowed will check if the permission is allowed
@@ -303,23 +305,13 @@ func (i *IAM) IsBasicAuthAllowed(username, password string) (err error) {
 }
 
 // GetApplyURL will generate the application URL
-func (i *IAM) GetApplyURL(application Application, bkToken string, bkUsername string) (url string, err error) {
+func (i *IAM) GetApplyURL(application Application) (url string, err error) {
 	err = application.Validate()
 	if err != nil {
 		return
 	}
 
-	if bkToken == "" && bkUsername == "" {
-		err = errors.New("bk_token and bk_username can not both be empty")
-		return
-	}
-
-	if i.esbClient != nil {
-		url, err = i.esbClient.GetApplyURL(bkToken, bkUsername, application)
-	} else {
-		// if use apigateway
-		url, err = i.client.GetApplyURL(application)
-	}
+	url, err = i.client.GetApplyURL(application)
 
 	return
 }
