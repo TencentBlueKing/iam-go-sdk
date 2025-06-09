@@ -48,6 +48,9 @@ func main() {
 	// if your TencentBlueking has a APIGateway, use NewAPIGatewayIAM, the url suffix is /stage/(for testing) and /prod/(for production)
 	// i := iam.NewAPIGatewayIAM("bk_paas", "bk_paas", "{app_secret}", "http://bk-iam.{APIGATEWAY_DOMAIN}/stage/")
 
+	// support multiple tenants, you can use NewIAM with bk tenant id option
+	// i := iam.NewIAM("bk_paas", "bk_paas", "{app_secret}", "http://{bk_iam_apigateway_url}", iam.WithBkTenantID("my_tenant_id"))
+
 	allowed, err := i.IsAllowed(req)
 	fmt.Println("isAllowed:", allowed, err)
 
