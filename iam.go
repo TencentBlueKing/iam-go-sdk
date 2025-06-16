@@ -36,8 +36,9 @@ import (
 
 // IAM is the instance of iam sdk
 type IAM struct {
-	appCode   string
-	appSecret string
+	appCode    string
+	appSecret  string
+	bkTenantID string
 
 	client client.IAMBackendClient
 }
@@ -46,9 +47,7 @@ type Option func(*IAM)
 
 func WithBkTenantID(bkTenantID string) Option {
 	return func(i *IAM) {
-		if i.client != nil {
-			client.WithBkTenantID(bkTenantID)
-		}
+		i.bkTenantID = bkTenantID
 	}
 }
 
@@ -60,18 +59,20 @@ func NewIAM(system, appCode, appSecret, bkAPIGatewayURL string, opts ...Option) 
 // NewAPIGatewayIAM will create an IAM instance, call all api through APIGateway
 // if your TencentBlueking has a APIGateway, use this, recommend
 func NewAPIGatewayIAM(system, appCode, appSecret, bkAPIGatewayURL string, opts ...Option) *IAM {
-	apigatewayClient := client.NewIAMBackendClient(bkAPIGatewayURL, system, appCode, appSecret)
-
 	c := &IAM{
 		appCode:   appCode,
 		appSecret: appSecret,
-
-		client: apigatewayClient,
 	}
 
 	for _, opt := range opts {
 		opt(c)
 	}
+
+	var clientOpts []client.Option
+	if c.bkTenantID != "" {
+		clientOpts = append(clientOpts, client.WithBkTenantID(c.bkTenantID))
+	}
+	c.client = client.NewIAMBackendClient(bkAPIGatewayURL, system, appCode, appSecret, clientOpts...)
 
 	return c
 }
